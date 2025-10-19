@@ -410,6 +410,48 @@ Delete promotion (requires Admin)
 
 ---
 
+### 🍀 Luck
+
+#### GET `/api/v1/luck/getrate`
+Get win rate based on user's luck number (requires login)
+
+**Headers:**
+- Session cookie required
+
+**Response:**
+```json
+{
+  "isPay": true
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not logged in
+- `500` - Internal server error
+
+---
+
+#### POST `/api/v1/luck/played`
+Record game play and update luck number (requires login)
+
+**Headers:**
+- Session cookie required
+
+**Response:**
+```json
+{
+  "msg": "ok"
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not logged in
+- `500` - Internal server error
+
+---
+
 ## Data Models
 
 ### Users
