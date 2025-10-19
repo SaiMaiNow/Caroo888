@@ -69,6 +69,375 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
-## `docker compose up -d --build` 
+# Caroo888 Backend API
 
-Run Backend for API
+Backend system for Caroo888 application providing user management, deposit/withdrawal, and promotion services.
+
+## Basic Information
+
+- **Base URL**: `http://localhost:4567/api`
+- **Port**: 4567
+- **Database**: PostgreSQL
+- **ORM**: Sequelize
+
+## Installation and Running
+`docker compose up -d --build`
+
+## API Endpoints
+
+### 🔐 Authentication
+
+#### POST `/api/v1/auth/register`
+Register new user
+
+**Request Body:**
+```json
+{
+  "firstname": "string",
+  "lastname": "string", 
+  "phoneNumber": "string",
+  "password": "string",
+  "agentCode": "string" // optional
+}
+```
+
+**Response:**
+```json
+{
+  "message": "User registered successfully",
+  "userId": 1
+}
+```
+
+**Status Codes:**
+- `201` - Registration successful
+- `400` - Invalid data
+- `409` - Phone number already registered
+- `500` - Internal server error
+
+---
+
+#### POST `/api/v1/auth/login`
+User login
+
+**Request Body:**
+```json
+{
+  "phoneNumber": "string",
+  "password": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Login successful"
+}
+```
+
+**Status Codes:**
+- `200` - Login successful
+- `400` - Invalid data
+- `401` - Invalid phone number or password
+- `500` - Internal server error
+
+---
+
+### 👤 Users
+
+#### GET `/api/v1/users/info`
+Get user information (requires login)
+
+**Headers:**
+- Session cookie required
+
+**Response:**
+```json
+{
+  "id": 1,
+  "role": "user",
+  "firstname": "John",
+  "lastname": "Doe",
+  "phoneNumber": "0812345678",
+  "balance": "1000.00",
+  "turn": "500.00",
+  "lucknumber": 100,
+  "gamelock": [],
+  "code": "ABC123"
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not logged in
+- `500` - Internal server error
+
+---
+
+#### GET `/api/v1/users/balance`
+Get user balance (requires login)
+
+**Headers:**
+- Session cookie required
+
+**Response:**
+```json
+{
+  "balance": "1000.00"
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not logged in
+- `500` - Internal server error
+
+---
+
+#### POST `/api/v1/users/withdraw`
+Withdraw money (requires login)
+
+**Headers:**
+- Session cookie required
+
+**Request Body:**
+```json
+{
+  "amount": "100.00"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Withdraw successful",
+  "balance": "900.00"
+}
+```
+
+**Status Codes:**
+- `200` - Withdraw successful
+- `400` - Invalid amount or insufficient balance
+- `401` - Not logged in
+- `404` - User not found
+- `500` - Internal server error
+
+---
+
+#### POST `/api/v1/users/deposit`
+Deposit money (requires login)
+
+**Headers:**
+- Session cookie required
+
+**Request Body:**
+```json
+{
+  "amount": "100.00",
+  "promotionCode": "PROMO123" // optional
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Deposit successful",
+  "balance": "1100.00"
+}
+```
+
+**Status Codes:**
+- `200` - Deposit successful
+- `400` - Invalid amount or promotion
+- `401` - Not logged in
+- `404` - User not found
+- `500` - Internal server error
+
+---
+
+#### GET `/api/v1/users/history`
+Get transaction history (requires login)
+
+**Headers:**
+- Session cookie required
+
+**Response:**
+```json
+[
+  {
+    "type": "deposit",
+    "amount": "100.00",
+    "promotionId": 1,
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "type": "withdraw", 
+    "amount": "50.00",
+    "promotionId": null,
+    "createdAt": "2024-01-02T00:00:00.000Z"
+  }
+]
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not logged in
+- `404` - User not found
+- `500` - Internal server error
+
+---
+
+### 🎁 Promotions
+
+#### GET `/api/v1/promotions/info`
+Get all promotions (requires login)
+
+**Headers:**
+- Session cookie required
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "code": "PROMO123",
+    "description": "Special promotion",
+    "increaseMoney": "50.00",
+    "increaseTurn": "100.00",
+    "usageLimit": 10,
+    "expirationDate": "2024-12-31T23:59:59.000Z"
+  }
+]
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not logged in
+- `500` - Internal server error
+
+---
+
+#### POST `/api/v1/promotions/create`
+Create new promotion (requires Admin)
+
+**Headers:**
+- Session cookie required
+
+**Request Body:**
+```json
+{
+  "description": "Special promotion",
+  "increaseMoney": "50.00",
+  "increaseTurn": "100.00", 
+  "usageLimit": 10,
+  "expirationDate": "2024-12-31T23:59:59.000Z"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Create Promotion successful"
+}
+```
+
+**Status Codes:**
+- `200` - Create successful
+- `400` - Invalid data
+- `401` - Not logged in or not Admin
+- `500` - Internal server error
+
+---
+
+#### PUT `/api/v1/promotions/edit`
+Edit promotion (requires Admin)
+
+**Headers:**
+- Session cookie required
+
+**Request Body:**
+```json
+{
+  "id": 1,
+  "description": "New promotion", // optional
+  "increaseMoney": "75.00", // optional
+  "increaseTurn": "150.00", // optional
+  "usageLimit": 20, // optional
+  "expirationDate": "2024-12-31T23:59:59.000Z" // optional
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Edit Promotion successful"
+}
+```
+
+**Status Codes:**
+- `200` - Edit successful
+- `400` - Invalid data
+- `401` - Not logged in or not Admin
+- `500` - Internal server error
+
+---
+
+#### DELETE `/api/v1/promotions/destroy`
+Delete promotion (requires Admin)
+
+**Headers:**
+- Session cookie required
+
+**Request Body:**
+```json
+{
+  "id": 1
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Destroy Promotion successful"
+}
+```
+
+**Status Codes:**
+- `200` - Delete successful
+- `400` - Invalid data
+- `401` - Not logged in or not Admin
+- `500` - Internal server error
+
+---
+
+## Data Models
+
+### Users
+- `id` - User ID (Primary Key)
+- `role` - Role (user/admin)
+- `firstname` - First name
+- `lastname` - Last name
+- `password` - Password
+- `phoneNumber` - Phone number (Unique)
+- `balance` - Account balance
+- `turn` - Turn amount
+- `lucknumber` - Lucky number
+- `gamelock` - Game lock data (JSON)
+- `code` - User code (Unique)
+
+### Promotions
+- `id` - Promotion ID (Primary Key)
+- `code` - Promotion code (Unique)
+- `description` - Description
+- `increaseMoney` - Money increase amount
+- `increaseTurn` - Turn increase amount
+- `usageLimit` - Usage limit count
+- `expirationDate` - Expiration date
+
+### Histories
+- `id` - History ID (Primary Key)
+- `userId` - User ID
+- `type` - Transaction type (deposit/withdraw)
+- `amount` - Amount
+- `promotionId` - Promotion ID (if applicable)
+- `createdAt` - Created date
