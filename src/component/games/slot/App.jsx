@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useState } from "react";
 import ReelGrid from "./ReelGrid";
 import ControlPanel from "./ControlPanel";
 import "./Slot.css";
@@ -49,18 +49,22 @@ const checkCombos = (grid) => {
 
 // cascade symbols ลงมาและเติมใหม่
 const cascadeSymbols = (grid, toRemove) => {
-  const newGrid = grid.map(row => [...row]);
+  const newGrid = grid.map((row) => [...row]);
 
   for (let c = 0; c < COLS; c++) {
     let colSymbols = [];
+
+    // เก็บสัญลักษณ์ที่เหลือจากล่างขึ้นบน
     for (let r = ROWS - 1; r >= 0; r--) {
       if (!toRemove[r][c]) colSymbols.push(newGrid[r][c]);
     }
 
+    // เติมใหม่จนเต็มคอลัมน์
     while (colSymbols.length < ROWS) {
       colSymbols.push(symbols[Math.floor(Math.random() * symbols.length)]);
     }
 
+    // เขียนกลับลงกริดจากล่างขึ้นบน
     for (let r = ROWS - 1; r >= 0; r--) {
       newGrid[r][c] = colSymbols[ROWS - 1 - r];
     }
@@ -115,9 +119,9 @@ const SlotApp = () => {
 
     setSpinning(true);
     if (freeSpins > 0) {
-      setFreeSpins(freeSpins - 1);
+      setFreeSpins((fs) => fs - 1);
     } else {
-      setBalance(balance - bet);
+      setBalance((b) => b - bet);
     }
     setWin(0);
 
@@ -142,7 +146,7 @@ const SlotApp = () => {
         const newStreak = winStreak + 1;
         setWinStreak(newStreak);
         if (newStreak >= 3) {
-          setFreeSpins(freeSpins + 1);
+          setFreeSpins((fs) => fs + 1);
           setWinStreak(0);
           alert("🎁 ได้ Free Spin 🐻!");
         }
@@ -157,7 +161,9 @@ const SlotApp = () => {
   return (
     <div className="slot-container">
       <h1 className="slot-title">Candy Burst Slot 🍭</h1>
+
       <ReelGrid grid={grid} spinning={spinning} />
+
       <ControlPanel
         balance={balance}
         bet={bet}
@@ -166,7 +172,12 @@ const SlotApp = () => {
         setBet={setBet}
         onSpin={handleSpin}
       />
-      {freeSpins > 0 && <div style={{ marginTop: "10px", color: "#ff6fb3", fontWeight: "bold" }}>🐻 Free Spins: {freeSpins}</div>}
+
+      {freeSpins > 0 && (
+        <div style={{ marginTop: 10, color: "#ff6fb3", fontWeight: "bold" }}>
+          🐻 Free Spins: {freeSpins}
+        </div>
+      )}
     </div>
   );
 };
