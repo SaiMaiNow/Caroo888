@@ -151,7 +151,7 @@ const SlotApp = () => {
       }
 
       setSpinning(false);
-    }, 2500);
+    }, 1500);
   };
 
   return (
