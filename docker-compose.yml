@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: caroo-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: adminCaroo888
+      POSTGRES_DB: Caroo888
+    volumes:
+      - caroo_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432"
+  backend:
+    image: rachanon20/caroo888-backend:latest
+    container_name: caroo888-backend
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - "4567:4567"
+
+volumes:
+  caroo_pgdata:
