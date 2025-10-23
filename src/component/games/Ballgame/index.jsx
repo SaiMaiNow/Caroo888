@@ -95,6 +95,7 @@ useEffect(() => {
         if (pass) {
           sA = randomScore();
           sB = randomScore();
+          setUser((u) => ({ ...u, luck: Math.max(0, u.luck - 5) }));
         } else {
           const forced = forceLose(userBet.team, userBet.team === m.teamA ? m.teamB : m.teamA);
           sA = forced[m.teamA];
