@@ -1,7 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import GlobalStyle from './GlobalStyle';
 
-import Home from "./component/Home"
 import Barcarat from "./component/games/Barcarat"
 
 function App() {
@@ -9,8 +8,7 @@ function App() {
     <>
       <GlobalStyle />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/games/barcarat" element={<Barcarat />} />
+        <Route path="/games/Barcarat" element={<Barcarat />} />
       </Routes>
     </>
   );
