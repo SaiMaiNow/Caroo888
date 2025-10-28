@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import styled from 'styled-components'; // (นี่คือส่วนที่ต้องติดตั้งเพิ่มในโปรเจกต์จริง)
 
 // --- 1. Game Configuration (Game Balance) ---
 const GRID_SIZE = 6;
@@ -281,7 +282,8 @@ const createRandomGrid = () => {
 
 
 // --- 3. Main Game Component (คอมโพเนนต์หลัก) ---
-export default function App() {
+// (THE CHANGE: รับ 'className' prop ที่จะถูกส่งมาจาก styled-components wrapper)
+function App({ className }) {
   
   // --- State (สถานะของเกม) ---
   const [grid, setGrid] = useState([]); 
@@ -318,7 +320,6 @@ export default function App() {
 
   
   // --- 3.1. Win Animation (อนิเมชันโชว์เงินไหล) ---
-  // (useCallback จะช่วยให้ฟังก์ชันนี้ไม่ถูกสร้างใหม่ทุกครั้ง)
   const runWinAnimation = useCallback(async (baseWin, totalMultiplier) => {
     setMessage("ชนะ!");
     setSpinWin(0); 
@@ -339,11 +340,10 @@ export default function App() {
 
     return baseWin; 
 
-  }, []); // (ว่างเปล่า = สร้างฟังก์ชันนี้แค่ครั้งเดียว)
+  }, []); 
 
   
   // --- 3.2. Main Spin Logic (ตรรกะการหมุนหลัก) ---
-  // (ตรรกะหลักยังคงอยู่ที่นี่ เพราะต้องใช้ State Setters จำนวนมาก)
   spinLogicRef.current = async () => {
     
     setSpinning(true);
@@ -525,344 +525,51 @@ export default function App() {
   
   // --- 3.5. Render (วาดหน้าจอ UI) ---
   return (
-    <>
-      {/* (Plain CSS ทั้งหมดจะอยู่ใน <style> นี้) */}
-      <style>
-        {`
-          .css-app-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background-color: #1a202c; /* เทียบเท่า bg-gray-900 */
-            color: white;
-            padding: 1rem;
-            font-family: sans-serif;
-          }
-          .css-title {
-            font-size: 2.25rem; /* เทียบเท่า text-4xl */
-            font-weight: bold;
-            color: #f6e05e; /* เทียบเท่า text-yellow-400 */
-            margin-bottom: 0.5rem;
-            text-shadow: 2px 2px #000;
-          }
-          .css-message {
-            font-size: 1.125rem; /* เทียบเท่า text-lg */
-            color: #d1d5db; /* เทียบเท่า text-gray-300 */
-            margin-bottom: 1rem;
-          }
-          .css-canvas-container {
-            position: relative;
-            width: 450px;
-            height: 450px;
-            background-color: black;
-            border-radius: 0.5rem; /* เทียบเท่า rounded-lg */
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* เทียบเท่า shadow-2xl */
-            overflow: hidden;
-            border: 4px solid #b7791f; /* เทียบเท่า border-yellow-600 */
-          }
-          .css-stats-bar {
-            display: flex;
-            justify-content: space-between;
-            width: 450px;
-            margin-top: 1rem;
-            font-size: 1.5rem; /* เทียบเท่า text-2xl */
-          }
-          .css-stat-box {
-            background-color: #2d3748; /* เทียบเท่า bg-gray-800 */
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* เทียบเท่า shadow-inner */
-          }
-          .css-stat-label {
-            color: #9ca3af; /* เทียบเท่า text-gray-400 */
-            margin-right: 0.5rem;
-          }
-          .css-stat-value-win {
-            color: #4ade80; /* เทียบเท่า text-green-400 */
-            font-weight: bold;
-          }
-          .css-stat-value-mult {
-            color: #f87171; /* เทียบเท่า text-red-400 */
-            font-weight: bold;
-          }
-          .css-controls-panel {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 1rem;
-            align-items: center;
-            width: 450px;
-            margin-top: 1rem;
-            padding: 1rem;
-            background-color: #2d3748; /* เทียบเท่า bg-gray-800 */
-            border-radius: 0.5rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* เทียบเท่า shadow-xl */
-          }
-          .css-bet-controls {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem; /* เทียบเท่า space-x-2 */
-          }
-          .css-bet-button {
-            width: 3rem; /* เทียบเท่า w-12 */
-            height: 3rem; /* เทียบเท่า h-12 */
-            border-radius: 9999px; /* เทียบเท่า rounded-full */
-            color: white;
-            font-size: 1.875rem; /* เทียบเท่า text-3xl */
-            font-weight: bold;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* เทียบเท่า shadow-md */
-            border: none;
-            cursor: pointer;
-          }
-          .css-bet-button:disabled {
-            opacity: 0.5;
-            cursor: default;
-          }
-          .css-bet-button-minus {
-            background-color: #dc2626; /* เทียบเท่า bg-red-600 */
-          }
-          .css-bet-button-minus:hover:not(:disabled) {
-            background-color: #ef4444; /* เทียบเท่า hover:bg-red-500 */
-          }
-          .css-bet-button-plus {
-            background-color: #16a34a; /* เทียบเท่า bg-green-600 */
-          }
-          .css-bet-button-plus:hover:not(:disabled) {
-            background-color: #22c55e; /* เทียบเท่า hover:bg-green-500 */
-          }
-          .css-bet-display {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-          }
-          .css-bet-label {
-            font-size: 0.75rem; /* เทียบเท่า text-xs */
-            color: #9ca3af; /* เทียบเท่า text-gray-400 */
-          }
-          .css-bet-value {
-            font-size: 1.25rem; /* เทียบเท่า text-xl */
-            font-weight: bold;
-            color: #f6e05e; /* เทียบเท่า text-yellow-400 */
-          }
-          .css-spin-button-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          .css-spin-button {
-            width: 6rem; /* เทียบเท่า w-24 */
-            height: 6rem; /* เทียบเท่า h-24 */
-            border-radius: 9999px;
-            font-weight: bold;
-            font-size: 1.5rem; /* เทียบเท่า text-2xl */
-            color: black;
-            border-width: 4px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* เทียบเท่า shadow-lg */
-            transition: all 0.15s ease-in-out;
-            cursor: pointer;
-          }
-          .css-spin-button:active:not(:disabled) {
-            transform: scale(0.95);
-          }
-          .css-spin-button:disabled {
-            opacity: 0.5;
-            cursor: default;
-          }
-          .css-spin-button-normal {
-            background-image: linear-gradient(to bottom right, #fcd34d, #f59e0b); /* เทียบเท่า from-yellow-400 to-yellow-600 */
-            border-color: #fef3c7; /* เทียบเท่า border-yellow-200 */
-          }
-          .css-spin-button-normal:hover:not(:disabled) {
-            background-image: linear-gradient(to bottom right, #fde047, #facc15); /* เทียบเท่า hover:from-yellow-300 hover:to-yellow-500 */
-          }
-          .css-spin-button-free {
-            background-image: linear-gradient(to bottom right, #c084fc, #a855f7); /* เทียบเท่า from-purple-400 to-purple-600 */
-            border-color: #e9d5ff; /* เทียบเท่า border-purple-300 */
-          }
-          .css-spin-button-pulsing {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-          }
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-          }
-          .css-side-panel {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem; /* เทียบเท่า space-y-2 */
-          }
-          .css-turbo-button {
-            width: 100%;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-weight: bold;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* เทียบเท่า shadow-md */
-            border: none;
-            cursor: pointer;
-          }
-          .css-turbo-button:disabled {
-            opacity: 0.3;
-            cursor: default;
-          }
-          .css-turbo-on {
-            background-color: #3b82f6; /* เทียบเท่า bg-blue-500 */
-            color: white;
-          }
-          .css-turbo-off {
-            background-color: #4b5563; /* เทียบเท่า bg-gray-600 */
-            color: #d1d5db; /* เทียบเท่า text-gray-300 */
-          }
-          .css-small-stat-row {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            font-size: 0.875rem; /* เทียบเท่า text-sm */
-          }
-          .css-small-stat-label {
-            color: #9ca3af; /* เทียบเท่า text-gray-400 */
-          }
-          .css-small-stat-luck {
-            color: #f6e05e; /* เทียบเท่า text-yellow-400 */
-            font-weight: bold;
-          }
-          .css-small-stat-balance {
-            color: #4ade80; /* เทียบเท่า text-green-400 */
-            font-weight: bold;
-          }
-
-          /* --- Popup Styles --- */
-          .css-popup-overlay {
-            position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-          }
-          .css-popup-box {
-            background-image: linear-gradient(to bottom right, #581c87, #3b0764); /* เทียบเท่า from-purple-800 to-purple-900 */
-            padding: 2rem;
-            border-radius: 1rem; /* เทียบเท่า rounded-2xl */
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            border: 4px solid #f6e05e; /* เทียบเท่า border-yellow-400 */
-            width: 91.666667%; /* เทียบเท่า w-11/12 */
-            text-align: center;
-          }
-          .css-popup-title {
-            font-size: 2.25rem; /* เทียบเท่า text-4xl */
-            font-weight: bold;
-            color: #f6e05e; /* เทียบเท่า text-yellow-400 */
-            margin-bottom: 1.5rem;
-          }
-          .css-popup-stat-block {
-            margin-bottom: 1rem;
-          }
-          .css-popup-stat-label {
-            font-size: 1.25rem; /* เทียบเท่า text-xl */
-            color: #d1d5db; /* เทียบเท่า text-gray-300 */
-          }
-          .css-popup-stat-value {
-            font-size: 3rem; /* เทียบเท่า text-5xl */
-            font-weight: bold;
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
-          }
-          .css-popup-win-green {
-            color: #4ade80; /* เทียบเท่า text-green-400 */
-          }
-          .css-popup-win-white {
-            color: white;
-          }
-          .css-popup-multiplier-block {
-            margin-bottom: 1.5rem;
-          }
-          .css-popup-multiplier-label {
-            font-size: 1.25rem; /* เทียบเท่า text-xl */
-            color: #d1d5db; /* เทียบเท่า text-gray-300 */
-          }
-          .css-popup-multiplier-value {
-            font-size: 3.75rem; /* เทียบเท่า text-6xl */
-            font-weight: bold;
-            color: #f87171; /* เทียบเท่า text-red-400 */
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
-            transition: transform 0.3s;
-          }
-          .css-popup-multiplier-scaled {
-            transform: scale(1.1);
-          }
-          .css-popup-confirm-button {
-            margin-top: 2rem;
-            padding: 0.75rem 2rem;
-            background-color: #f59e0b; /* เทียบเท่า bg-yellow-500 */
-            color: black;
-            font-size: 1.5rem; /* เทียบเท่า text-2xl */
-            font-weight: bold;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* เทียบเท่า shadow-lg */
-            transition: all 0.15s ease-in-out;
-            border: none;
-            cursor: pointer;
-          }
-          .css-popup-confirm-button:hover {
-            background-color: #fcd34d; /* เทียบเท่า hover:bg-yellow-400 */
-          }
-        `}
-      </style>
+    // (THE CHANGE: ส่ง 'className' ให้กับ div นอกสุด)
+    <div className={className}>
       
-      {/* (Cleaned JSX) 
-        ส่วน JSX นี้จะ "สะอาด" ขึ้นมาก เพราะเราแยกคอมโพเนนต์ย่อยออกไป
-      */}
-      <div className="css-app-container">
-        
-        <h1 className="css-title">
-          Chocolate Deluxe Demo
-        </h1>
-        <p className="css-message">{message}</p>
+      {/* (THE CHANGE: ลบแท็ก <style> ออกจากที่นี่) */}
+      
+      <h1 className="css-title">
+        Chocolate Deluxe Demo
+      </h1>
+      <p className="css-message">{message}</p>
 
-        {/* --- 4.1. คอมโพเนนต์ Canvas (แยกส่วนวาดรูป) --- */}
-        <GameCanvas
-          grid={grid}
-          spinning={spinning}
-          winningCells={winningCells}
-          isFreeSpins={isFreeSpins}
-          pulseStateRef={pulseStateRef}
-          lastPulseTimeRef={lastPulseTimeRef}
-          showFreeSpinSummary={showFreeSpinSummary}
-          freeSpinTotalWin={freeSpinTotalWin}
-          freeSpinTotalMultiplier={freeSpinTotalMultiplier}
-          onCloseSummary={handleCloseSummary}
-        />
+      {/* --- 4.1. คอมโพเนนต์ Canvas (แยกส่วนวาดรูป) --- */}
+      <GameCanvas
+        grid={grid}
+        spinning={spinning}
+        winningCells={winningCells}
+        isFreeSpins={isFreeSpins}
+        pulseStateRef={pulseStateRef}
+        lastPulseTimeRef={lastPulseTimeRef}
+        showFreeSpinSummary={showFreeSpinSummary}
+        freeSpinTotalWin={freeSpinTotalWin}
+        freeSpinTotalMultiplier={freeSpinTotalMultiplier}
+        onCloseSummary={handleCloseSummary}
+      />
 
-        {/* --- 4.2. คอมโพเนนต์ Stats (แยกส่วนแสดงผล 'ชนะ') --- */}
-        <StatsDisplay
-          spinWin={spinWin}
-          spinMultiplier={spinMultiplier}
-        />
+      {/* --- 4.2. คอมโพเนนต์ Stats (แยกส่วนแสดงผล 'ชนะ') --- */}
+      <StatsDisplay
+        spinWin={spinWin}
+        spinMultiplier={spinMultiplier}
+      />
 
-        {/* --- 4.3. คอมโพเนนต์ Controls (แยกส่วนปุ่มทั้งหมด) --- */}
-        <ControlPanel
-          spinning={spinning}
-          isFreeSpins={isFreeSpins}
-          isAutoSpinningFreeSpins={isAutoSpinningFreeSpins}
-          isTurbo={isTurbo}
-          currentBet={currentBet}
-          freeSpinsLeft={freeSpinsLeft}
-          luck={luck}
-          balance={balance}
-          onChangeBet={handleChangeBet}
-          onSpin={handleSpin}
-          onToggleTurbo={handleToggleTurbo}
-        />
-
-      </div>
-    </>
+      {/* --- 4.3. คอมโพเนนต์ Controls (แยกส่วนปุ่มทั้งหมด) --- */}
+      <ControlPanel
+        spinning={spinning}
+        isFreeSpins={isFreeSpins}
+        isAutoSpinningFreeSpins={isAutoSpinningFreeSpins}
+        isTurbo={isTurbo}
+        currentBet={currentBet}
+        freeSpinsLeft={freeSpinsLeft}
+        luck={luck}
+        balance={balance}
+        onChangeBet={handleChangeBet}
+        onSpin={handleSpin}
+        onToggleTurbo={handleToggleTurbo}
+      />
+    </div>
   );
 }
 
@@ -1109,3 +816,294 @@ function FreeSpinSummary({ baseWin, totalMultiplier, onClose }) {
   );
 }
 
+
+// --- 5. Styled-Components Wrapper (THE CHANGE) ---
+// (นี่คือแพทเทิร์นที่เพื่อนคุณใช้: export default styled(Component))
+// (CSS ทั้งหมดจากแท็ก <style> ถูกย้ายมาไว้ที่นี่)
+export default styled(App)`
+  /* นี่คือสไตล์ของ .css-app-container (div นอกสุด) */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #1a202c; 
+  color: white;
+  padding: 1rem;
+  font-family: sans-serif;
+
+  /* (นี่คือสไตล์ของคลาสลูกๆ ที่อยู่ข้างใน) */
+  .css-title {
+    font-size: 2.25rem; 
+    font-weight: bold;
+    color: #f6e05e; 
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px #000;
+  }
+  .css-message {
+    font-size: 1.125rem; 
+    color: #d1d5db; 
+    margin-bottom: 1rem;
+  }
+  .css-canvas-container {
+    position: relative;
+    width: 450px;
+    height: 450px;
+    background-color: black;
+    border-radius: 0.5rem; 
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
+    overflow: hidden;
+    border: 4px solid #b7791f; 
+  }
+  .css-stats-bar {
+    display: flex;
+    justify-content: space-between;
+    width: 450px;
+    margin-top: 1rem;
+    font-size: 1.5rem; 
+  }
+  .css-stat-box {
+    background-color: #2d3748; 
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); 
+  }
+  .css-stat-label {
+    color: #9ca3af; 
+    margin-right: 0.5rem;
+  }
+  .css-stat-value-win {
+    color: #4ade80; 
+    font-weight: bold;
+  }
+  .css-stat-value-mult {
+    color: #f87171; 
+    font-weight: bold;
+  }
+  .css-controls-panel {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: center;
+    width: 450px;
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #2d3748; 
+    border-radius: 0.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); 
+  }
+  .css-bet-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; 
+  }
+  .css-bet-button {
+    width: 3rem; 
+    height: 3rem; 
+    border-radius: 9999px; 
+    color: white;
+    font-size: 1.875rem; 
+    font-weight: bold;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+    border: none;
+    cursor: pointer;
+  }
+  .css-bet-button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .css-bet-button-minus {
+    background-color: #dc2626; 
+  }
+  .css-bet-button-minus:hover:not(:disabled) {
+    background-color: #ef4444; 
+  }
+  .css-bet-button-plus {
+    background-color: #16a34a; 
+  }
+  .css-bet-button-plus:hover:not(:disabled) {
+    background-color: #22c55e; 
+  }
+  .css-bet-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .css-bet-label {
+    font-size: 0.75rem; 
+    color: #9ca3af; 
+  }
+  .css-bet-value {
+    font-size: 1.25rem; 
+    font-weight: bold;
+    color: #f6e05e; 
+  }
+  .css-spin-button-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .css-spin-button {
+    width: 6rem; 
+    height: 6rem; 
+    border-radius: 9999px;
+    font-weight: bold;
+    font-size: 1.5rem; 
+    color: black;
+    border-width: 4px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+    transition: all 0.15s ease-in-out;
+    cursor: pointer;
+  }
+  .css-spin-button:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+  .css-spin-button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .css-spin-button-normal {
+    background-image: linear-gradient(to bottom right, #fcd34d, #f59e0b); 
+    border-color: #fef3c7; 
+  }
+  .css-spin-button-normal:hover:not(:disabled) {
+    background-image: linear-gradient(to bottom right, #fde047, #facc15); 
+  }
+  .css-spin-button-free {
+    background-image: linear-gradient(to bottom right, #c084fc, #a855f7); 
+    border-color: #e9d5ff; 
+  }
+  .css-spin-button-pulsing {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .css-side-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; 
+  }
+  .css-turbo-button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+    border: none;
+    cursor: pointer;
+  }
+  .css-turbo-button:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .css-turbo-on {
+    background-color: #3b82f6; 
+    color: white;
+  }
+  .css-turbo-off {
+    background-color: #4b5563; 
+    color: #d1d5db; 
+  }
+  .css-small-stat-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 0.875rem; 
+  }
+  .css-small-stat-label {
+    color: #9ca3af; 
+  }
+  .css-small-stat-luck {
+    color: #f6e05e; 
+    font-weight: bold;
+  }
+  .css-small-stat-balance {
+    color: #4ade80; 
+    font-weight: bold;
+  }
+
+  /* --- Popup Styles --- */
+  .css-popup-overlay {
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .css-popup-box {
+    background-image: linear-gradient(to bottom right, #581c87, #3b0764); 
+    padding: 2rem;
+    border-radius: 1rem; 
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 4px solid #f6e05e; 
+    width: 91.666667%; 
+    text-align: center;
+  }
+  .css-popup-title {
+    font-size: 2.25rem; 
+    font-weight: bold;
+    color: #f6e05e; 
+    margin-bottom: 1.5rem;
+  }
+  .css-popup-stat-block {
+    margin-bottom: 1rem;
+  }
+  .css-popup-stat-label {
+    font-size: 1.25rem; 
+    color: #d1d5db; 
+  }
+  .css-popup-stat-value {
+    font-size: 3rem; 
+    font-weight: bold;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .css-popup-win-green {
+    color: #4ade80; 
+  }
+  .css-popup-win-white {
+    color: white;
+  }
+  .css-popup-multiplier-block {
+    margin-bottom: 1.5rem;
+  }
+  .css-popup-multiplier-label {
+    font-size: 1.25rem; 
+    color: #d1d5db; 
+  }
+  .css-popup-multiplier-value {
+    font-size: 3.75rem; 
+    font-weight: bold;
+    color: #f87171; 
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    transition: transform 0.3s;
+  }
+  .css-popup-multiplier-scaled {
+    transform: scale(1.1);
+  }
+  .css-popup-confirm-button {
+    margin-top: 2rem;
+    padding: 0.75rem 2rem;
+    background-color: #f59e0b; 
+    color: black;
+    font-size: 1.5rem; 
+    font-weight: bold;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+    transition: all 0.15s ease-in-out;
+    border: none;
+    cursor: pointer;
+  }
+  .css-popup-confirm-button:hover {
+    background-color: #fcd34d; 
+  }
+`;
