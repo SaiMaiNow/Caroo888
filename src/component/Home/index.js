@@ -20,7 +20,7 @@ function Home({ className }) {
         </svg>
       ),
       label: "สล็อต",
-      path: "/slots"
+      path: "/slots",
     },
     {
       id: 2,
@@ -47,7 +47,7 @@ function Home({ className }) {
         </svg>
       ),
       label: "บาคาร่า",
-      path: "/baccarat"
+      path: "/baccarat",
     },
     {
       id: 3,
@@ -74,7 +74,7 @@ function Home({ className }) {
         </svg>
       ),
       label: "ไพ่สิบโชค",
-      path: "/ten-card"
+      path: "/ten-card",
     },
     {
       id: 4,
@@ -94,7 +94,7 @@ function Home({ className }) {
         </svg>
       ),
       label: "ฟุตบอล",
-      path: "/football"
+      path: "/football",
     },
   ];
 
@@ -108,6 +108,105 @@ function Home({ className }) {
           </Link>
         ))}
       </div>
+
+      <div className="content">
+        <section className="banner">
+
+        </section>
+
+        <section className="games-section">
+          <div className="section-header">
+            <img src="" className="section-icon" />
+            <h2>สล็อตออนไลน์</h2>
+          </div>
+
+          <div className="games-grid">
+            <div className="game-card large">
+              <span className="game-title"></span>
+            </div>
+            <div className="game-cards-small">
+              <div className="game-card small">
+                <span className="game-title"></span>
+              </div>
+              <div className="game-card small">
+                <span className="game-title"></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <section className="games-section dark">
+          <div className="section-header">
+            <div className="icon-badge">
+            </div>
+            <h2>บาคาร่าออนไลน์</h2>
+          </div>
+
+          <div className="games-grid">
+            <div className="game-card large">
+              <span className="game-title"></span>
+            </div>
+            <div className="game-cards-small">
+              <div className="game-card small"></div>
+              <div className="game-card small"></div>
+            </div>
+          </div>
+        </section>
+
+
+        <section className="recommended-section">
+          <h2 className="section-title">เกมแนะนำยอดนิยมตอนนี้</h2>
+
+          <div className="featured-game">
+            <div className="game-preview"></div>
+            <p className="game-subtitle">เกมแนะนำ</p>
+          </div>
+
+          <div className="recommended-grid">
+            <div className="recommended-card">1</div>
+            <div className="recommended-card">2</div>
+            <div className="recommended-card">3</div>
+            <div className="recommended-card">4</div>
+          </div>
+        </section>
+
+        <section className="info-game">
+          <h2 className="brand-title">Caroo888</h2>
+
+          <p className="description">
+          แพลตฟอร์มเกมเสี่ยงโชคสุดล้ำ ที่สร้างมาเพื่อความรวย สัมผัสประสบการณ์เกมแนวคาสิโน เช่น เกมเลือกไพ่ เสี่ยงดวงฟุตบอล และสุ่มโชคของผู้เล่นในรูปแบบเกมเสมือนจริง
+          </p>
+
+          <div className="info-section">
+            <h3> Slot สาวถ้ำ</h3>
+            <p>
+            สัมผัสพลังแห่งโชคลาภจากดินแดนโบราณ!เพียงกดหมุน วงล้อขนาด 5x6 จะสุ่มภาพทั้งหมดพร้อมกันหากภาพตรงกันในแนวตั้ง แนวนอน หรือแนวเฉียง จะได้รับรางวัลทันที!เมื่อชนะ สัญลักษณ์ที่แตกจะหล่นลงมาแทนที่ สร้างโอกาสรับโบนัสซ้ำได้ไม่รู้จบ!เลือกช่วงราคาการหมุนได้ตามใจ แล้วลุ้นรับสมบัติล้ำค่าของสาวถ้ำไปพร้อมกัน!
+            </p>
+          </div>
+
+          <div className="info-section">
+            <h3>บาคาร่า</h3>
+            <p>
+            เกมไพ่สุดฮิตประจำโต๊ะ! เลือกระหว่าง Player (น้ำเงิน) หรือ Banker (แดง) เพื่อทายฝั่งที่แต้มสูงกว่า ยังมีให้เลือกเดิมพัน Player Pair / Banker Pair (ดำ) หรือ Pie (เขียว) เพิ่มความมันส์! เปิดไพ่ 2 ใบลุ้นแต้มสูงสุด 9 แต้ม ดูสถิติย้อนหลังได้ 7 ตา ช่วยประกอบการตัดสินใจในการลงเดิมพันรอบต่อไป ทายถูก รับเงินเต็มมือ ทำทุนกู้ซื้อรถให้ชายไอซ์ได้สบาย ๆ
+            </p>
+          </div>
+
+          <div className="info-section">
+            <h3>เกมเลือกไพ่เสี่ยงโชค</h3>
+            <p>
+            เลือกจากไพ่ 10 ใบ เปิดไปทีละใบเพื่อตามหารางวัลใหญ่! เลือกถูก รับเงินต่อไปเรื่อย ๆ เลือกพอเมื่อไหร่ กด “พอ” เพื่อรับรางวัลที่ได้มา แต่ต้องเลือกถูกอย่างน้อย 2 ใบก่อนถึงจะได้เงินนะ! แต่ระวัง… ถ้าเปิดพลาดเมื่อไหร่ แตกหมดทันที! 🔥 เกมเสี่ยงโชคสไตล์คาสิโนฝรั่ง สนุก ลุ้น ระทึกทุกคลิก!
+            </p>
+          </div>
+
+          <div className="info-section">
+            <h3>ทายผลบอลเสี่ยงโชค</h3>
+            <p>
+            เกมใหม่สายฟุตบอลสำหรับสายวัดดวง! ระบบจะสุ่มทีมจาก 16 ทีม มา 2 ทีมให้คุณเลือกทายผล เลือกทีมที่คุณมั่นใจ แล้วลุ้นผลชนะจากโชคและค่าพลังทีม ยิ่งทีมคุณโชคดีเท่าไหร่ โอกาสชนะก็ยิ่งสูง! ใครสายบอล ห้ามพลาด — เดิมพันมันส์ ลุ้นผลไวเหมือนดูบอลจริง!
+            </p>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
@@ -115,18 +214,13 @@ function Home({ className }) {
 export default styled(Home)`
   font-family: "Italiana", serif;
   display: flex;
-  min-height: calc(100vh - 120px); /* เว้นที่สำหรับ Navbar */
-  background: #000;
-  color: #fff;
-  margin-top: 120px; /* เว้นระยะจาก Navbar */
+  // min-height: calc(100vh - 120px); /* เว้น Navbar */
 
   .sidebar {
     width: 220px;
-    background: #1a1a1a;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 1rem 0;
     gap: 0.5rem;
 
     .menu-item {
@@ -147,18 +241,232 @@ export default styled(Home)`
       color: #000000;
       text-decoration: none;
 
-      &.active {
-        background: linear-gradient(to bottom, #e89300, #ffb83f);
-        box-shadow: 0 0 15px rgba(255, 184, 63, 0.5);
-      }
-
       &:hover {
         opacity: 0.8;
         transform: scale(1.05);
       }
 
+      svg {
+        color: #000000;
+        fill: currentColor;
+        stroke: currentColor;
+        flex-shrink: 0;
+        background: #e89300;
+      }
+
       .label {
         font-size: 15px;
+        color: #000000;
+        font-weight: 500;
+        background: #e89300;
+      }
+    }
+  }
+
+  .content {
+    flex: 1;
+    padding-right: 2rem;
+    margin-top: 15px;
+
+    .banner {
+      background: linear-gradient(to right, #e89300, #ffb83f);
+      height: 270px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 1.5rem;
+
+      .banner-dots {
+        display: flex;
+        gap: 0.5rem;
+
+        .dot {
+          width: 14px;
+          height: 14px;
+          background: #666;
+          border-radius: 50%;
+          transition: all 0.3s ease;
+
+          &.active {
+            background: #000;
+          }
+        }
+      }
+    }
+
+    .games-section {
+      margin-top: 1.5rem;
+      background: #1a1a1a;
+
+      &.dark {
+        background: #000;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+
+        .section-icon {
+          width: 40px;
+          height: 40px;
+          border-radius: 8px;
+        }
+
+        .icon-badge {
+          background: linear-gradient(to bottom, #e89300, #ffb83f);
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          svg {
+            color: #000;
+          }
+        }
+
+        h2 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #fff;
+        }
+      }
+
+      .games-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1rem;
+
+        .game-card {
+          background: #2b2b2b;
+          border-radius: 12px;
+          display: flex;
+          align-items: flex-end;
+          padding: 1rem;
+          position: relative;
+          overflow: hidden;
+
+          &.large {
+            height: 180px;
+          }
+
+          &.small {
+            height: 85px;
+          }
+
+          .game-title {
+            font-size: 0.9rem;
+            color: #fff;
+            position: relative;
+            z-index: 1;
+          }
+        }
+
+        .game-cards-small {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+      }
+    }
+
+    .recommended-section {
+      padding: 2rem 1.5rem;
+      background: #000000;
+      margin-top: 1.5rem;
+
+      .section-title {
+        text-align: center;
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #fff;
+        background: #000000;
+      }
+
+      .featured-game {
+        background: linear-gradient(to right, #e89300, #ffb83f);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+
+        .game-preview {
+          background: #e0e0e0;
+          height: 180px;
+          border-radius: 8px;
+          margin-bottom: 0.75rem;
+        }
+
+        .game-subtitle {
+          text-align: center;
+          margin-top: 0.75rem;
+          font-size: 2rem;
+          color: #000;
+          background: none;
+        }
+      }
+
+      .recommended-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+
+        .recommended-card {
+          background: #2b2b2b;
+          height: 70px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.85rem;
+          color: #fff;
+          cursor: pointer;
+          transition: all 0.3s ease;
+
+          &:hover {
+            background: #3a3a3a;
+            transform: translateY(-2px);
+          }
+        }
+      }
+    }
+    .info-game {
+      padding: 2.5rem 1.5rem;
+
+      .brand-title {
+        font-family: "Keania One", cursive;
+        font-size: 30px;
+        letter-spacing: 2px;
+        color: #ffb703;
+        text-decoration: none;
+      }
+
+      .description {
+        font-size: 20px;
+        color: #999;
+        line-height: 1.7;
+        margin-bottom: 2rem;
+      }
+
+      .info-section {
+        margin-bottom: 2rem;
+        font-family: "Inter", serif;
+
+        h3 {
+          color: #ffb83f;
+          font-size: 30px;
+          font-weight: 600;
+          margin-bottom: 0.75rem;
+        }
+
+        p {
+          font-size: 20px;
+          color: #999;
+          line-height: 1.7;
+        }
       }
     }
   }
