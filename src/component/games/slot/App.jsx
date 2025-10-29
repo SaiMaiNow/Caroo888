@@ -250,7 +250,7 @@ function App({ className }) {
   return (
     <div className={className}>
       <h1 className="css-title">
-        Chocolate Deluxe Demo
+        Chocolate Deluxe Caroo888
       </h1>
       <p className="css-message">{message}</p>
 
@@ -322,11 +322,19 @@ export default styled(App)`
     position: relative;
     width: 450px;
     height: 450px;
-    background-color: black;
-    border-radius: 0.5rem; 
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
+    background: linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.35));
+    border-radius: 18px; 
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.15); 
     overflow: hidden;
-    border: 4px solid #b7791f; 
+    border: 5px solid #b88a2b; 
+  }
+  .css-canvas-container::before {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    border-radius: 14px;
+    /* border: 2px solid rgba(255,255,255,0.15); */
+    pointer-events: none;
   }
   .css-stats-bar {
     display: flex;
@@ -361,9 +369,10 @@ export default styled(App)`
     width: 450px;
     margin-top: 1rem;
     padding: 1rem;
-    background-color: #2d3748; 
-    border-radius: 0.5rem;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); 
+    background: linear-gradient(180deg, #6b4f2c, #4b3521);
+    border-radius: 16px;
+    border: 3px solid #b88a2b;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.15);
   }
   .css-bet-controls {
     display: flex;
@@ -375,11 +384,12 @@ export default styled(App)`
     width: 3rem; 
     height: 3rem; 
     border-radius: 9999px; 
-    color: white;
+    color: #2b1d12;
     font-size: 1.875rem; 
     font-weight: bold;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
-    border: none;
+    box-shadow: 0 6px 10px rgba(0,0,0,0.25);
+    border: 2px solid #f1d28a;
+    background-image: linear-gradient(180deg, #f9e08a, #d8aa2b);
     cursor: pointer;
   }
   .css-bet-button:disabled {
@@ -423,9 +433,9 @@ export default styled(App)`
     border-radius: 9999px;
     font-weight: bold;
     font-size: 1.5rem; 
-    color: black;
+    color: #2b1d12;
     border-width: 4px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+    box-shadow: 0 18px 30px rgba(0,0,0,0.35);
     transition: all 0.15s ease-in-out;
     cursor: pointer;
   }
@@ -437,14 +447,14 @@ export default styled(App)`
     cursor: default;
   }
   .css-spin-button-normal {
-    background-image: linear-gradient(to bottom right, #fcd34d, #f59e0b); 
-    border-color: #fef3c7; 
+    background-image: linear-gradient(to bottom right, #f9e08a, #d8aa2b); 
+    border-color: #f1d28a; 
   }
   .css-spin-button-normal:hover:not(:disabled) {
-    background-image: linear-gradient(to bottom right, #fde047, #facc15); 
+    background-image: linear-gradient(to bottom right, #ffe48f, #e1b236); 
   }
   .css-spin-button-free {
-    background-image: linear-gradient(to bottom right, #c084fc, #a855f7); 
+    background-image: linear-gradient(to bottom right, #c084fc, #7c3aed); 
     border-color: #e9d5ff; 
   }
   .css-spin-button-pulsing {
@@ -464,10 +474,10 @@ export default styled(App)`
   .css-turbo-button {
     width: 100%;
     padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
+    border-radius: 10px;
     font-weight: bold;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
-    border: none;
+    box-shadow: 0 6px 10px rgba(0,0,0,0.25);
+    border: 2px solid #f1d28a;
     cursor: pointer;
   }
   .css-turbo-button:disabled {
@@ -475,12 +485,12 @@ export default styled(App)`
     cursor: default;
   }
   .css-turbo-on {
-    background-color: #3b82f6; 
-    color: white;
+    background-image: linear-gradient(180deg, #8ec5ff, #3b82f6);
+    color: #0b1a2e;
   }
   .css-turbo-off {
-    background-color: #4b5563; 
-    color: #d1d5db; 
+    background-image: linear-gradient(180deg, #6b7280, #4b5563);
+    color: #e5e7eb; 
   }
   .css-small-stat-row {
     display: flex;

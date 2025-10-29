@@ -17,7 +17,7 @@ export function ControlPanel({
           -
         </button>
         <div className="css-bet-display">
-          <span className="css-bet-label">เดิมพัน</span>
+          <span className="css-bet-label">bet</span>
           <span className="css-bet-value">{currentBet}</span>
         </div>
         <button

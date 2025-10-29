@@ -36,6 +36,21 @@ export function GameCanvas({
   const imageElementsRef = useRef({});
   const [imagesReadyVersion, setImagesReadyVersion] = useState(0);
 
+  const drawRoundedRect = (ctx, x, y, w, h, r) => {
+    const radius = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + w - radius, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+    ctx.lineTo(x + w, y + h - radius);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+    ctx.lineTo(x + radius, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  };
+
   // Preload images once
   useEffect(() => {
     const map = {};
@@ -96,14 +111,42 @@ export function GameCanvas({
           ctx.globalAlpha = 0.3;
         }
 
-        ctx.fillStyle = isFreeSpins ? '#4a2f64' : '#5a3a22';
-        ctx.fillRect(x + 1, y + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+        // Cell background with rounded corners and subtle vertical gradient
+        const pad = 4;
+        const rx = x + pad;
+        const ry = y + pad;
+        const rw = CELL_SIZE - pad * 2;
+        const rh = CELL_SIZE - pad * 2;
+        const radius = Math.min(14, rw / 2, rh / 2);
+        const grad = ctx.createLinearGradient(0, ry, 0, ry + rh);
+        if (isFreeSpins) {
+          grad.addColorStop(0, '#56307c');
+          grad.addColorStop(1, '#3a1e57');
+        } else {
+          grad.addColorStop(0, '#8a6a4a');
+          grad.addColorStop(1, '#5f462f');
+        }
+        ctx.fillStyle = grad;
+        drawRoundedRect(ctx, rx, ry, rw, rh, radius);
+        ctx.fill();
+
+        // Inner bevel
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.lineWidth = 1;
+        drawRoundedRect(ctx, rx + 1, ry + 1, rw - 2, rh - 2, radius - 1);
+        ctx.stroke();
+
+        // Golden border
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 2;
+        drawRoundedRect(ctx, rx, ry, rw, rh, radius);
+        ctx.stroke();
 
         if (cell) {
           const img = imageElementsRef.current[cell.symbol];
           const hasImg = img && img.complete && img.naturalWidth > 0;
           if (hasImg) {
-            const padding = 6;
+            const padding = 10;
             const drawX = x + padding;
             const drawY = y + padding;
             const drawSize = CELL_SIZE - padding * 2;
@@ -117,17 +160,38 @@ export function GameCanvas({
           }
 
           if (cell.multiplier > 1) {
-            ctx.font = 'bold 24px Arial';
-            ctx.fillStyle = '#ff4d4d';
-            ctx.fillText(`x${cell.multiplier}`, x + CELL_SIZE / 2 + 10, y + CELL_SIZE / 2 + 15);
+            // Badge pill top-left
+            const badgeW = 36;
+            const badgeH = 22;
+            const bx = rx + 6;
+            const by = ry + 6;
+            const badgeGrad = ctx.createLinearGradient(bx, by, bx, by + badgeH);
+            badgeGrad.addColorStop(0, '#ff6b6b');
+            badgeGrad.addColorStop(1, '#e63946');
+            ctx.fillStyle = badgeGrad;
+            drawRoundedRect(ctx, bx, by, badgeW, badgeH, 10);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.lineWidth = 1;
+            drawRoundedRect(ctx, bx + 0.5, by + 0.5, badgeW - 1, badgeH - 1, 9.5);
+            ctx.stroke();
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`x${cell.multiplier}`, bx + badgeW / 2, by + badgeH / 2 + 1);
           }
         }
         
         if (isWinningCell && !spinning) {
           ctx.globalAlpha = pulseOpacity;
           ctx.strokeStyle = '#FFD700';
-          ctx.lineWidth = 5;
-          ctx.strokeRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+          ctx.lineWidth = 4;
+          drawRoundedRect(ctx, rx - 1, ry - 1, rw + 2, rh + 2, radius + 2);
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = '#FFD700';
+          ctx.stroke();
+          ctx.shadowBlur = 0;
           ctx.globalAlpha = 1.0;
         }
       }
