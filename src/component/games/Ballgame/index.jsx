@@ -1,510 +1,493 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 
-
-
-const ROUND_SECONDS = 15;
-const MAX_MATCHES = 38;
+const TIME = 15;
 const TEAMS = [
-  "Liverpool", "Man City", "Arsenal", "Chelsea", "Tottenham",
-  "Man United", "Newcastle", "Aston Villa", "Brighton", "West Ham",
-  "Fulham", "Brentford", "Crystal Palace", "Wolves", "Everton",
-  "Forest", "Leicester", "Leeds", "Bournemouth", "Burnley"
+  { name: "Liverpool", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Man City", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Arsenal", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Chelsea", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Tottenham", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Man United", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Newcastle", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Aston Villa", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Brighton", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "West Ham", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Fulham", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Brentford", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Crystal Palace", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Wolves", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Everton", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Forest", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Leicester", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Leeds", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Bournemouth", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Burnley", pts: 0, p: 0, w: 0, d: 0, l: 0 },
 ];
 
-const randomScore = () => Math.floor(Math.random() * 11);
-const checkLuck = (luck) => Math.floor(Math.random() * 100) + 1 <= luck;
-const forceLose = (team, opp) => ({
-  [team]: Math.floor(Math.random() * 4),
-  [opp]: Math.floor(Math.random() * 6) + 5,
-});
+const MockUSER = { name: "Player1", luck: 55, bal: 5000, bets: [] };
 
-export default function FootballLuckGameMiniStyled() {
-  const [teams, setTeams] = useState(
-    TEAMS.map((n) => ({ name: n, pts: 0, p: 0, w: 0, d: 0, l: 0 }))
-  );
-  const [resultsLog, setResultsLog] = useState([]);
-const [betsLog, setBetsLog] = useState([]);
-
+function FootballLuckGameMiniStyled({ className }) {
+  const [teams, setTeams] = useState(TEAMS);
   const [matches, setMatches] = useState([]);
-  const [timer, setTimer] = useState(ROUND_SECONDS);
+  const [resultsLog, setResultsLog] = useState([]);
+  const [betsLog, setBetsLog] = useState([]);
+  const [timer, setTimer] = useState(TIME);
   const [isBetting, setIsBetting] = useState(true);
-  const [round, setRound] = useState(0);
-  const [finishedBets, setFinishedBets] = useState([]);
-  const [user, setUser] = useState({
-    name: "Player1",
-    luck: 55,
-    bal: 4977,
-    bets: [],
-  });
+  const [user, setUser] = useState(MockUSER);
   const [betAmount, setBetAmount] = useState(100);
-  const [msg, setMsg] = useState("");
-  const [results, setResults] = useState([]);
   const timerRef = useRef();
-  const [betConfirmed, setBetConfirmed] = useState(false);
 
-  // 🔹 เพิ่มสำหรับ popup/modal
   const [showModal, setShowModal] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [tempTeam, setTempTeam] = useState("");
   const [tempAmount, setTempAmount] = useState("");
+  const [results, setResults] = useState([]);
 
+  const randomScore = () => Math.floor(Math.random() * 11);
+  const checkLuck = (luck) => Math.floor(Math.random() * 100) + 1 <= luck;
+  const forceLose = (team, opp) => ({
+    [team]: Math.floor(Math.random() * 4),
+    [opp]: Math.floor(Math.random() * 6) + 5,
+  });
+
+  const rate = () => Number((1.4 + Math.random() * 0.6).toFixed(2));
   const genMatches = () => {
     const shuffled = [...teams].sort(() => Math.random() - 0.5);
-    setMatches([
-      { teamA: shuffled[0].name, teamB: shuffled[1].name },
-      { teamA: shuffled[2].name, teamB: shuffled[3].name },
-    ]);
+    const newMatches = [
+      {
+        teamA: shuffled[0].name,
+        teamB: shuffled[1].name,
+        rates: [rate(), 1, rate()],
+      },
+      {
+        teamA: shuffled[2].name,
+        teamB: shuffled[3].name,
+        rates: [rate(), 1, rate()],
+      },
+    ];
+    setMatches(newMatches);
   };
-  useEffect(() => { genRate(); }, []);
 
- 
+  useEffect(() => genMatches(), []);
   useEffect(() => {
     if (!isBetting) return;
     timerRef.current = setInterval(() => setTimer((t) => t - 1), 1000);
     return () => clearInterval(timerRef.current);
   }, [isBetting]);
-  useEffect(() => { if (timer <= 0) endRound(); }, [timer]);
+  useEffect(() => {
+    if (timer <= 0) endRound();
+  }, [timer]);
 
-  const rate = () => Number((1.4 + Math.random() * 0.6).toFixed(2));
+  const confirmBet = (matchIndex, team) => {
+    if (!isBetting) return;
+    const amt = Number(tempAmount || betAmount);
+    if (amt <= 0 || user.bal < amt) return alert("ยอดเงินไม่พอ");
+    if (user.bets.find((b) => b.match === matchIndex))
+      return alert("คุณเดิมพันคู่นี้แล้ว");
 
-const genRate = () => {
-  const shuffled = [...teams].sort(() => Math.random() - 0.5);
-  const newMatches = [
-    { 
-      teamA: shuffled[0].name, 
-      teamB: shuffled[1].name,
-      rates: [rate(), 1, rate()] // ใช้ rate() ครั้งเดียวตอนสร้าง match
-    },
-    { 
-      teamA: shuffled[2].name, 
-      teamB: shuffled[3].name,
-      rates: [rate(), 1, rate()]
-    },
-  ];
-  setMatches(newMatches);
-};
+    const now = new Date();
+    const dateStr = `${now.getDate()}/${now.getMonth() + 1}`;
+    const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(
+      2,
+      "0"
+    )}`;
+    const m = matches[matchIndex];
+    const teamRate =
+      team === m.teamA ? m.rates[0] : team === m.teamB ? m.rates[2] : 1;
 
+    const payload = {
+      match: matchIndex,
+      team,
+      amt,
+      rate: teamRate,
+      date: dateStr,
+      time: timeStr,
+    };
+    setUser({ ...user, bal: user.bal - amt, bets: [...user.bets, payload] });
 
-const confirmBet = (matchIndex, team) => {
-  if (!isBetting) return;
-  if (betAmount <= 0 || user.bal < betAmount) return alert("ยอดเงินไม่พอ");
-  const alreadyBet = user.bets.find((b) => b.match === matchIndex);
-  if (alreadyBet) return alert("คุณเดิมพันคู่นี้แล้ว");
-
-  const now = new Date();
-  const dateStr = `${now.getDate()}/${now.getMonth()+1}`;
-  const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-  const teamRate = team === matches[matchIndex].teamA ? matches[matchIndex].rates[0]
-               : team === matches[matchIndex].teamB ? matches[matchIndex].rates[2]
-               : 1;
-
-  const payload = {
-    match: matchIndex,
-    team,
-    amt: betAmount,
-  rate: teamRate, // ใช้ rate ที่คงที่จาก match
-    date: dateStr,
-    time: timeStr
+    setBetsLog((prev) => [
+      ...prev,
+      {
+        ...payload,
+        teamA: m.teamA,
+        teamB: m.teamB,
+        sA: null,
+        sB: null,
+        won: null,
+        betType: "รอผล",
+      },
+    ]);
   };
 
-  // อัพเดท user
-  setUser({
-    ...user,
-    bal: user.bal - betAmount,
-    bets: [...user.bets, payload],
-  });
+  const endRound = () => {
+    setIsBetting(false);
+    clearInterval(timerRef.current);
+    const now = new Date();
+    const dateStr = `${now.getDate()}/${now.getMonth() + 1}`;
+    const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(
+      2,
+      "0"
+    )}`;
 
-  // เพิ่ม log ทันที
-  setBetsLog(prev => [
-    ...prev,
-    {
-      ...payload,
-      teamA: matches[matchIndex].teamA,
-      teamB: matches[matchIndex].teamB,
-      sA: null, // ยังไม่มีสกอร์ตอนนี้
-      sB: null,
-      won: null,
-      betType: "รอผล",
-    }
-  ]);
-
-  setBetConfirmed(true);
-  setMsg(`เดิมพัน ${team} จำนวน ${betAmount}฿`);
-};
-
-
-
-
-const endRound = () => {
-  setIsBetting(false);
-  clearInterval(timerRef.current);
-
-  const now = new Date();
-  const dateStr = `${now.getDate()}/${now.getMonth()+1}`;
-  const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-  const matchResults = matches.map((m, i) => {
-    const userBet = user.bets.find((b) => b.match === i);
-    let sA, sB;
-    if (userBet) {
-      const pass = checkLuck(user.luck);
-      if (pass) {
-           setUser(u => ({ ...u, luck: u.luck - 5 })); // ลด luck
-        sA = randomScore(); sB = randomScore();
+    const matchResults = matches.map((m, i) => {
+      const bet = user.bets.find((b) => b.match === i);
+      let sA, sB;
+      if (bet) {
+        if (checkLuck(user.luck)) {
+          setUser((u) => ({ ...u, luck: u.luck - 5 }));
+          sA = randomScore();
+          sB = randomScore();
+        } else {
+          const forced = forceLose(
+            bet.team,
+            bet.team === m.teamA ? m.teamB : m.teamA
+          );
+          sA = forced[m.teamA];
+          sB = forced[m.teamB];
+        }
       } else {
-        const forced = forceLose(userBet.team, userBet.team === m.teamA ? m.teamB : m.teamA);
-        sA = forced[m.teamA]; sB = forced[m.teamB];
+        sA = randomScore();
+        sB = randomScore();
       }
-    } else { sA = randomScore(); sB = randomScore(); }
-    const win = sA > sB ? m.teamA : sB > sA ? m.teamB : "draw";
-    return { ...m, sA, sB, win, date: dateStr, time: timeStr };
-  });
-
-  // อัพเดทผลการแข่งขัน log
-  setResultsLog(prev => [...prev, ...matchResults]);
-
-  // อัพเดทผลการเดิมพัน log
-  const newBetsLog = user.bets.map(bet => {
-    const r = matchResults[bet.match];
-    let won = null;
-    if (r.win === "draw") won = null; // เสมอ
-    else won = r.win === bet.team;
-    return {
-      ...r,
-      teamBet: bet.team,
-      betType: won === null ? "เสมอ" : won ? "ชนะไป" : "แพ้",
-      amount: bet.amt * (won ? bet.rate : 1),
-      won
-    };
-  });
-  setBetsLog(prev => [...prev, ...newBetsLog]);
-
-  // อัพเดทคะแนน
-  let tcopy = [...teams];
-  matchResults.forEach((r) => {
-    tcopy = tcopy.map((t) => {
-      if (t.name === r.teamA || t.name === r.teamB) {
-        let add = 0, w = t.w, d = t.d, l = t.l;
-        if (r.win === "draw") { add = 1; d++; }
-        else if (r.win === t.name) { add = 3; w++; }
-        else { l++; }
-        return { ...t, pts: t.pts + add, p: t.p + 1, w, d, l };
-      }
-      return t;
+      const win = sA > sB ? m.teamA : sB > sA ? m.teamB : "draw";
+      return { ...m, sA, sB, win, date: dateStr, time: timeStr };
     });
-  });
 
-  // อัพเดท user balance
-  let gain = 0;
-  user.bets.forEach((bet) => {
-    const r = matchResults[bet.match];
-    if (r.win === bet.team) gain += Math.round(bet.amt * bet.rate);
-  });
+    setResultsLog((prev) => [...prev, ...matchResults]);
 
-  setTeams(tcopy.sort((a,b)=>b.pts - a.pts));
-  setUser(u => ({ ...u, bal: u.bal + gain, bets: [] }));
-  setResults(matchResults);
-  setRound(r => r + 1);
-  setMsg(`รอบจบแล้ว! ได้คืนรวม ${gain}฿`);
+    const newBetsLog = user.bets.map((b) => {
+      const r = matchResults[b.match];
+      const won = r.win === b.team;
+      return {
+        ...r,
+        teamBet: b.team,
+        betType: r.win === "draw" ? "เสมอ" : won ? "ชนะไป" : "แพ้",
+        amount: b.amt * (won ? b.rate : 1),
+        won,
+      };
+    });
+    setBetsLog((prev) => [...prev, ...newBetsLog]);
 
-  // รีเซ็ตสำหรับรอบต่อไป แต่ log คงอยู่
-setTimeout(() => {
-  setResults([]); 
-  genRate(); // <-- สร้าง match + rates พร้อม
-  setTimer(ROUND_SECONDS); 
-  setIsBetting(true);
-}, 2500);
-};
+    let updatedTeams = [...teams];
+    matchResults.forEach((r) => {
+      updatedTeams = updatedTeams.map((t) => {
+        if (t.name === r.teamA || t.name === r.teamB) {
+          let add = 0,
+            w = t.w,
+            d = t.d,
+            l = t.l;
+          if (r.win === "draw") {
+            add = 1;
+            d++;
+          } else if (r.win === t.name) {
+            add = 3;
+            w++;
+          } else {
+            l++;
+          }
+          return { ...t, pts: t.pts + add, p: t.p + 1, w, d, l };
+        }
+        return t;
+      });
+    });
 
+    let gain = 0;
+    user.bets.forEach((b) => {
+      const r = matchResults[b.match];
+      if (r.win === b.team) gain += Math.round(b.amt * b.rate);
+    });
+    setTeams(updatedTeams.sort((a, b) => b.pts - a.pts));
+    setUser((u) => ({ ...u, bal: u.bal + gain, bets: [] }));
+    setResults(matchResults);
+
+    setTimeout(() => {
+      setResults([]);
+      genMatches();
+      setTimer(TIME);
+      setIsBetting(true);
+    }, 2500);
+  };
 
   return (
-    <Layout>
-    
-      <Header>
-        <h1>Apex <span>Ball</span></h1>
-        <UserInfo>
-          🍀 Luck {user.luck}   💰 ฿{user.bal}   {user.name} 
-        </UserInfo>
-      </Header>
+    <div className={className}>
+      <div className="header">
+        <h1>
+          Apex <span>Ball</span>
+        </h1>
+        <div className="userInfo">
+          🍀 Luck {user.luck} 💰 ฿{user.bal} {user.name}
+        </div>
+      </div>
 
-      <Main>
-        <SidebarLeft>
+      <div className="main">
+        {/* sidebar-left */}
+        <div className="sidebar-left">
           <h2>ตารางคะแนน</h2>
-          <Table>
+          <table>
             <thead>
-              <tr><th>#</th><th>ทีม</th><th>แข่ง</th><th>ชนะ</th><th>เสมอ</th><th>แพ้</th><th>แต้ม</th></tr>
+              <tr>
+                <th>#</th>
+                <th>ทีม</th>
+                <th>แข่ง</th>
+                <th>ชนะ</th>
+                <th>เสมอ</th>
+                <th>แพ้</th>
+                <th>แต้ม</th>
+              </tr>
             </thead>
             <tbody>
-            
               {teams.map((t, i) => (
                 <tr key={t.name}>
-                  <td>{i + 1}</td><td>{t.name}</td><td>{t.p}</td>
-                  <td>{t.w}</td><td>{t.d}</td><td>{t.l}</td><td>{t.pts}</td>
+                  <td>{i + 1}</td>
+                  <td>{t.name}</td>
+                  <td>{t.p}</td>
+                  <td>{t.w}</td>
+                  <td>{t.d}</td>
+                  <td>{t.l}</td>
+                  <td>{t.pts}</td>
                 </tr>
               ))}
-              <br />
             </tbody>
-          </Table>
-        </SidebarLeft>
-
-        <Center>
-          <Banner>ภาพโฆษณา</Banner>
-          
-<Matches>
-  {matches.map((m, i) => {
-    // ตรวจสอบว่าผู้เล่นเดิมพันคู่นี้แล้วหรือยัง
-    const betForMatch = user.bets.find(b => b.match === i);
-
-    return (
-      <MatchCard key={i}>
-        <div className="header">
-          <div className="logo">Logo</div>
-          <div className="date">28/10<br /><small>{timer}s</small></div>
-          <div className="logo">Logo</div>
+          </table>
         </div>
 
-        <div className="teams">
-          <span>{m.teamA}</span><span>{m.teamB}</span>
-        </div>
-<br />
-<div className="odds">
-  {m.rates?.map((r, idx) => { 
-    const label = idx === 0 ? "ชนะ" : idx === 1 ? "เสมอ" : "แพ้";
-    return (
-      <span key={idx} title={label}>
-        {r}x
-      </span>
-    );
-  })}
-</div>
-<br />
-        {/* แสดงข้อมูลเดิมพันถ้ามี */}
-        {betForMatch && (
-          <div className="betInfo">
-            เดิมพัน {betForMatch.team} จำนวน {betForMatch.amt}฿
+        {/* center */}
+        <div className="center">
+          <div className="banner">ภาพโฆษณา</div>
+          <div className="matches">
+            {matches.map((m, i) => {
+              const betForMatch = user.bets.find((b) => b.match === i);
+              return (
+                <div className="matchCard" key={i}>
+                  <div className="header">
+                    <div className="logo">Logo</div>
+                    <div className="date">
+                      28/10
+                      <br />
+                      <small>{timer}s</small>
+                    </div>
+                    <div className="logo">Logo</div>
+                  </div>
+                  <div className="teams">
+                    <span>{m.teamA}</span>
+                    <span>{m.teamB}</span>
+                  </div>
+                  <div className="odds">
+                    {m.rates.map((r, idx) => (
+                      <span
+                        key={idx}
+                        title={idx === 0 ? "ชนะ" : idx === 1 ? "เสมอ" : "แพ้"}
+                      >
+                        {r}x
+                      </span>
+                    ))}
+                  </div>
+                  {betForMatch && (
+                    <div className="betInfo">
+                      เดิมพัน {betForMatch.team} จำนวน {betForMatch.amt}฿
+                    </div>
+                  )}
+                  <button
+                    disabled={!!betForMatch}
+                    onClick={() => {
+                      if (!isBetting) {
+                        alert("หมดเวลาวางเดิมพันแล้ว ไม่สามารถวางเดิมพันได้!");
+                        return;
+                      }
+                      if (!betForMatch) {
+                        setSelectedMatch(i);
+                        setTempTeam(m.teamA);
+                        setShowModal(true);
+                      }
+                    }}
+                  >
+                    {betForMatch ? "วางเดิมพันเรียบร้อย" : "ร่วมสนุกทันที"}
+                  </button>
+                </div>
+              );
+            })}
           </div>
-        )}
+        </div>
 
-        <button
-          disabled={!!betForMatch} // กดไม่ได้ถ้าวางเดิมพันแล้ว
-          onClick={() => {
-            if (!betForMatch) {
-              setSelectedMatch(i);
-              setTempTeam(m.teamA);
-              setShowModal(true);
-            }
-          }}
-        >
-          {betForMatch ? "วางเดิมพันเรียบร้อย" : "ร่วมสนุกทันที"}
-        </button>
-      </MatchCard>
-    );
-  })}
-</Matches>
-
-        </Center>
-<SidebarRight>
-  <div className="section">
-<h3>ผลการแข่งขัน</h3>
-<LogBox>
-  {resultsLog.length === 0 ? (
-    <p>ยังไม่มีผล</p>
-  ) : (
-    [...resultsLog].reverse().map((r, i) => {  // <-- เพิ่ม reverse()
-      const timeStr = r.time || "เวลาไม่ระบุ";
-      let resultText;
-
-      if (r.win === "draw") {
-        resultText = `${r.date} [ เสมอ ] ${r.teamA} ${r.sA}-${r.sB} ${r.teamB} ${timeStr}`;
-      } else {
-        const loser = r.teamA === r.win ? r.teamB : r.teamA;
-        resultText = `${r.date} [ ${r.win} ชนะ ] ${loser} ${loser === r.teamA ? r.sA : r.sB}-${r.win === r.teamA ? r.sA : r.sB} ${r.win} ${timeStr}`;
-      }
-
-      let color = r.win === "draw" ? "#ffff00" : "#ffffffff"; // เสมอเหลือง ชนะขาว
-      return <p key={i} style={{color, marginBottom: "4px"}}>{resultText}</p>;
-    })
-  )}
-</LogBox>
-
-  </div>
-
-  <div className="section">
-    <h3>ผลการเดิมพัน</h3>
-    <LogBox>
-{betsLog.length === 0 ? (
-  <p>ยังไม่มีการเดิมพัน</p>
-) : (
-    betsLog
-      .filter(b => b.won !== null)   // <-- กรองเฉพาะที่มีผลแล้ว
-       .reverse() // <-- reverse เพื่อเอาอันล่าสุดบนสุด
-      .map((b, i) => {
-        const statusText = b.won ? "คุณชนะเดิมพัน" : "คุณแพ้เดิมพัน";
-        let color = b.won ? "#00ff00" : "#ff4444";
-
-    return (
-      <p key={i} style={{color, marginBottom:"6px"}}>
-        {statusText} ({b.date} {b.time})<br/>
-        คุณเดิมพัน {b.teamBet} {b.betType}<br/>
-        {b.sA !== null ? `${b.teamA} ${b.sA}-${b.sB} ${b.teamB}` : `${b.teamA} vs ${b.teamB}`}<br/>
-        {b.won === null ? `จำนวนเดิมพัน ${b.amt}฿` : b.won ? `ได้รับ ${b.amount} บาท` : `เสีย ${b.amount} บาท`}
-      </p>
-    );
-  })
-)}
-    </LogBox>
-  </div>
-</SidebarRight>
-
-
-      </Main>
-
-      {/* 🔹 Modal กล่องเดิมพัน */}
-      {showModal && (
-        <ModalOverlay>
-          <ModalBox>
-            <h3>วางเดิมพัน</h3>
-<TeamSelectWrapper>
-  คุณเลือก:       
-  <select
-    value={tempTeam}
-    onChange={(e) => setTempTeam(e.target.value)}
-  >
-    <option value={matches[selectedMatch].teamA}>
-      {matches[selectedMatch].teamA}
-    </option>
-    <option value={matches[selectedMatch].teamB}>
-      {matches[selectedMatch].teamB}
-    </option>
-  </select>
-</TeamSelectWrapper>
-            <input
-              type="number"
-              placeholder="กรอกจำนวนเดิมพัน"
-              value={tempAmount}
-              onChange={(e) => setTempAmount(e.target.value)}
-            />
-            <div className="btns">
-              <button onClick={() => {
-
-                 if (!isBetting || timer <= 0) {
-            alert("หมดเวลาวางเดิมพันแล้ว");
-            setShowModal(false);
-            return;
-          }
-
-                const amt = Number(tempAmount);
-                if (amt <= 0 || user.bal < amt) {
-                  alert("ยอดเงินไม่พอหรือไม่ถูกต้อง");
-                  return;
-                }
-                setBetAmount(amt);
-                confirmBet(selectedMatch, tempTeam);
-                setShowModal(false);
-                setTempAmount("");
-              }}>ยืนยัน</button>
-
-              <button className="cancel" onClick={() => setShowModal(false)}>ยกเลิก</button>
+        {/* sidebar-right */}
+        <div className="sidebar-right">
+          <div className="section">
+            <h3>ผลการแข่งขัน</h3>
+            <div className="resultBox">
+              {resultsLog.length === 0 ? (
+                <p>ยังไม่มีผล</p>
+              ) : (
+                [...resultsLog].reverse().map((r, i) => (
+                  <p key={i}>
+                    {r.date} {r.teamA} {r.sA}-{r.sB} {r.teamB} [{r.win}]
+                  </p>
+                ))
+              )}
             </div>
-          </ModalBox>
-        </ModalOverlay>
+          </div>
+          <div className="section">
+            <h3>ผลการเดิมพัน</h3>
+            <div className="resultBox">
+              {betsLog.length === 0 ? (
+                <p>ยังไม่มีการเดิมพัน</p>
+              ) : (
+                betsLog
+                  .filter((b) => b.won !== null)
+                  .reverse()
+                  .map((b, i) => (
+                    <p key={i}>
+                      {b.teamBet} {b.betType} | {b.amount}฿
+                    </p>
+                  ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {showModal && (
+        <div className="modalWrapper">
+          <div className="modalBox">
+            <h3>วางเดิมพัน</h3>
+            <>
+              <p className="teamSelectWrapper">
+                เลือกทีม:
+                <select
+                  value={tempTeam}
+                  onChange={(e) => setTempTeam(e.target.value)}
+                >
+                  <option value={matches[selectedMatch].teamA}>
+                    {matches[selectedMatch].teamA}
+                  </option>
+                  <option value={matches[selectedMatch].teamB}>
+                    {matches[selectedMatch].teamB}
+                  </option>
+                </select>
+              </p>
+              <input
+                type="number"
+                placeholder="จำนวนเดิมพัน"
+                value={tempAmount}
+                onChange={(e) => setTempAmount(e.target.value)}
+              />
+              <div className="btns">
+                <button
+                  onClick={() => {
+                    if (!isBetting) {
+                      alert("หมดเวลาวางเดิมพันแล้ว ไม่สามารถวางเดิมพันได้!");
+                      setShowModal(false);
+                      return;
+                    }
+                    confirmBet(selectedMatch, tempTeam);
+                    setShowModal(false);
+                    setTempAmount("");
+                  }}
+                >
+                  ยืนยัน
+                </button>
+                <button className="cancel" onClick={() => setShowModal(false)}>
+                  ยกเลิก
+                </button>
+              </div>
+            </>
+          </div>
+        </div>
       )}
-    </Layout>
+    </div>
   );
 }
 
-/* 🎨 Styled Components */
-const Layout = styled.div`
-font-family: 'Tahoma', 'Segoe UI', 'Arial', 'Helvetica', 'Roboto', sans-serif;
+export default styled(FootballLuckGameMiniStyled)`
+  font-family: "Tahoma", sans-serif;
   background: #111;
   color: #fff;
-
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-`;
 
-const Header = styled.header`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #1a1a1a;
-  padding: 15px 30px;
-  border-bottom: 2px solid #00eaff;
-  h1 { font-size: 24px; }
-  span { color: #00eaff; }
-`;
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1a1a1a;
+    padding: 15px 30px;
+    border-bottom: 2px solid #00eaff;
+  }
+  .header h1 {
+    font-size: 24px;
+  }
+  .header h1 span {
+    color: #00eaff;
+  }
+  .userInfo {
+    color: #ccc;
+    font-size: 14px;
+  }
 
-const UserInfo = styled.div`
-  color: #ccc;
-  font-size: 14px;
-`;
-
-const Main = styled.main`
-  display: grid;
-  grid-template-columns: 22% 56% 22%;
-  flex-grow: 1;
-`;
-
-const SidebarLeft = styled.aside`
-  background: #232323;
-  padding: 10px;
-  h2 {
+  .main {
+    display: grid;
+    grid-template-columns: 22% 56% 22%;
+    flex-grow: 1;
+  }
+  .sidebar-left {
+    background: #232323;
+    padding: 10px;
+  }
+  .sidebar-left h2 {
     background: #00eaff;
     color: #000;
     text-align: center;
     border-radius: 6px;
     margin-bottom: 10px;
   }
-`;
+  .sidebar-left table {
+    width: 100%;
+    font-size: 12px;
+    border-collapse: collapse;
+    color: #ddd;
+  }
+  .sidebar-left th,
+  td {
+    padding: 4px;
+    text-align: center;
+  }
+  .sidebar-left th {
+    color: #00eaff;
+  }
 
-const Table = styled.table`
-  width: 100%;
-  font-size: 12px;
-  border-collapse: collapse;
-  color: #ddd;
-  th, td { padding: 4px; text-align: center; }
-  th { color: #00eaff; }
-`;
-
-const Center = styled.section`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 15px;
-  gap: 15px;
-`;
-
-const Banner = styled.div`
-  background: #00eaff;
-  color: #000;
-  width: 100%;
-  height: 180px;
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-`;
-
-const Matches = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-`;
-
-const MatchCard = styled.div`
-  
-  background: #111;
-  border: 2px solid #00eaff;
-  border-radius: 12px;
-  width: 230px;
-  text-align: center;
-  padding: 30px;
-  .betInfo {
+  .center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    gap: 15px;
+  }
+  .banner {
+    background: #00eaff;
+    color: #000;
+    width: 100%;
+    height: 180px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+  }
+  .matches {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+  }
+  .matchCard {
+    background: #111;
+    border: 2px solid #00eaff;
+    border-radius: 12px;
+    width: 230px;
+    text-align: center;
+    padding: 30px;
+  }
+  .matchCard .betInfo {
     background: #00eaff22;
     color: #00eaff;
     font-size: 12px;
@@ -512,10 +495,12 @@ const MatchCard = styled.div`
     margin: 6px 0;
     padding: 4px;
   }
-  .header {
-display: flex; justify-content: space-between; align-items: center; 
+  .matchCard .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
-  .logo {
+  .matchCard .logo {
     background: #00eaff;
     color: #000;
     font-weight: 600;
@@ -526,40 +511,38 @@ display: flex; justify-content: space-between; align-items: center;
     align-items: center;
     justify-content: center;
   }
-  .date {
+  .matchCard .date {
     font-size: 12px;
     color: #aaa;
   }
-  .teams {
+  .matchCard .teams {
     display: flex;
     justify-content: space-between;
     margin-top: 6px;
   }
-  .odds {
+  .matchCard .odds {
     display: flex;
     justify-content: center;
     gap: 8px;
     margin: 6px 0;
   }
-.odds span {
-  border: 1px solid #00eaff;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: default;
-  background: #111;
-  transition: 0.2s;
-}
-
-.odds span:hover {
-  background: #00eaff22;
-  color: #00eaff;
-}
-
-  button {
+  .matchCard .odds span {
+    border: 1px solid #00eaff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    background: #111;
+    transition: 0.2s;
+  }
+  .matchCard .odds span:hover {
+    background: #00eaff22;
+    color: #00eaff;
+  }
+  .matchCard button {
     background: #00eaff;
     color: #000;
     border: none;
@@ -569,54 +552,58 @@ display: flex; justify-content: space-between; align-items: center;
     cursor: pointer;
     transition: 0.2s;
   }
-  button:hover {
+  .matchCard button:hover {
     background: #00ffff;
   }
-`;
 
-const SidebarRight = styled.aside`
-  background: #232323;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  .sidebar-right {
+    background: #232323;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
   .section h3 {
     color: #00eaff;
     border-bottom: 1px solid #00eaff;
     padding-bottom: 4px;
   }
-  .box {
+  .resultBox {
     background: #1c1c1c;
     border-radius: 6px;
-    padding: 6px;
+    padding: 10px;
     font-size: 13px;
+    height: 200px;
+    overflow-y: auto;
   }
-`;
 
-/* 🔹 Popup Styled */
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-`;
-
-const ModalBox = styled.div`
-  background: #111;
-  border: 2px solid #00eaff;
-  border-radius: 12px;
-  padding: 25px;
-  width: 300px;
-  text-align: center;
-  color: #fff;
-  box-shadow: 0 0 15px #00eaff55;
-
-  h3 { color: #00eaff; margin-bottom: 10px; }
-  input {
+  .modalWrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+  .modalBox {
+    background: #111;
+    border: 2px solid #00eaff;
+    border-radius: 12px;
+    padding: 25px;
+    width: 300px;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 0 15px #00eaff55;
+  }
+  .modalBox h3 {
+    color: #00eaff;
+    margin-bottom: 10px;
+  }
+  .modalBox input {
     width: 100%;
     padding: 8px;
     background: #000;
@@ -631,7 +618,7 @@ const ModalBox = styled.div`
     justify-content: space-between;
     gap: 10px;
   }
-  button {
+  .btns button {
     flex: 1;
     background: #00eaff;
     color: #000;
@@ -642,33 +629,22 @@ const ModalBox = styled.div`
     cursor: pointer;
     transition: 0.2s;
   }
-  button.cancel {
+  .btns button.cancel {
     background: #444;
     color: #fff;
   }
-  button:hover {
+  .btns button:hover {
     opacity: 0.85;
   }
-`;
-//    {teams.slice(0, 20).map((t, i) => (
-const LogBox = styled.div`
-  background: #1c1c1c;
-  border-radius: 6px;
-  padding: 10px;
-  font-size: 13px;
-  height: 200px;
-  overflow-y: auto;
-`;
-
-const TeamSelectWrapper = styled.p`
-  font-size: 14px;
-  color: #fff;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  select {
+  .teamSelectWrapper {
+    font-size: 14px;
+    color: #fff;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .teamSelectWrapper select {
     background: #000;
     color: #00eaff;
     border: 1px solid #00eaff;
@@ -677,19 +653,16 @@ const TeamSelectWrapper = styled.p`
     font-size: 14px;
     cursor: pointer;
     transition: 0.2s;
-
-    &:hover {
-      border-color: #00ffff;
-      background: #111;
-    }
-
-    &:focus {
-      outline: none;
-      box-shadow: 0 0 5px #00eaff;
-    }
   }
-
-  option {
+  .teamSelectWrapper select:hover {
+    border-color: #00ffff;
+    background: #111;
+  }
+  .teamSelectWrapper select:focus {
+    outline: none;
+    box-shadow: 0 0 5px #00eaff;
+  }
+  .teamSelectWrapper option {
     background: #111;
     color: #00eaff;
     padding: 4px 10px;
