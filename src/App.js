@@ -3,6 +3,7 @@ import GlobalStyle from './GlobalStyle';
 
 import Home from "./component/Home"
 import Navbar from './component/Navbar';
+import Test from "./component/Test"
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/Test" element={<Test />} />
       </Routes>
     </>
   );
