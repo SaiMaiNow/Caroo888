@@ -11,7 +11,7 @@ function App() {
       <GlobalStyle />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/slot" element={<SlotGame />} />
+        <Route path="/games/slot" element={<SlotGame />} />
       </Routes>
     </>
   );
