@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
+import bg from './assets/bg.jpg';
 import { GameCanvas } from './features/GameCanvas';
 import { StatsDisplay } from './features/StatsDisplay';
 import { ControlPanel } from './features/ControlPanel';
@@ -28,7 +29,7 @@ function App({ className }) {
   const [spinMultiplier, setSpinMultiplier] = useState(0); 
 
   // Luck State
-  const [luck, setLuck] = useState(80); 
+  const [luck, setLuck] = useState(0); 
 
   // Highlight State
   const [winningCells, setWinningCells] = useState(new Set()); 
@@ -296,6 +297,10 @@ export default styled(App)`
   justify-content: center;
   min-height: 100vh;
   background-color: #1a202c; 
+  background-image: url(${bg});
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   color: white;
   padding: 1rem;
   font-family: sans-serif;

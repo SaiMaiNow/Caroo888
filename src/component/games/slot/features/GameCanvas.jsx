@@ -1,6 +1,31 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { GRID_SIZE, CELL_SIZE } from '../constants';
 import { FreeSpinSummary } from './FreeSpinSummary';
+
+// Preload symbol images and map from the current emoji symbols to image URLs
+import truffleImg from '../assets/truffle2.png';
+import strawberryImg from '../assets/strawberry2.png';
+import blueImg from '../assets/blue2.png';
+import orangeImg from '../assets/orange2.png';
+import spadeImg from '../assets/spade.png';
+import heartImg from '../assets/heart.png';
+import clubImg from '../assets/club.png';
+import diamondImg from '../assets/diamond.png';
+import wildImg from '../assets/wild2.png';
+import scatterImg from '../assets/scatter2.png';
+
+const SYMBOL_IMAGE_URL_MAP = {
+  '🌰': truffleImg,
+  '🍓': strawberryImg,
+  '💧': blueImg,
+  '🍊': orangeImg,
+  '♠️': spadeImg,
+  '♥️': heartImg,
+  '♣️': clubImg,
+  '♦️': diamondImg,
+  '🃏': wildImg,
+  '🎁': scatterImg,
+};
 
 export function GameCanvas({
   grid, spinning, winningCells, isFreeSpins,
@@ -8,6 +33,36 @@ export function GameCanvas({
   showFreeSpinSummary, freeSpinTotalWin, freeSpinTotalMultiplier, onCloseSummary
 }) {
   const canvasRef = useRef(null);
+  const imageElementsRef = useRef({});
+  const [imagesReadyVersion, setImagesReadyVersion] = useState(0);
+
+  // Preload images once
+  useEffect(() => {
+    const map = {};
+    const urls = SYMBOL_IMAGE_URL_MAP;
+    let loadedCount = 0;
+    const symbols = Object.keys(urls);
+    const total = symbols.length;
+    symbols.forEach((sym) => {
+      const img = new Image();
+      img.src = urls[sym];
+      img.onload = () => {
+        loadedCount += 1;
+        if (loadedCount === total) {
+          setImagesReadyVersion((v) => v + 1);
+        } else {
+          // Trigger incremental re-render for progressive loading
+          setImagesReadyVersion((v) => v + 1);
+        }
+      };
+      img.onerror = () => {
+        // Still trigger to avoid blocking renders
+        setImagesReadyVersion((v) => v + 1);
+      };
+      map[sym] = img;
+    });
+    imageElementsRef.current = map;
+  }, []);
 
   // --- Drawing Engine (กลไกการวาดภาพ) ---
   useEffect(() => {
@@ -45,10 +100,21 @@ export function GameCanvas({
         ctx.fillRect(x + 1, y + 1, CELL_SIZE - 2, CELL_SIZE - 2);
 
         if (cell) {
-          ctx.font = '40px Arial';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(cell.symbol, x + CELL_SIZE / 2, y + CELL_SIZE / 2);
+          const img = imageElementsRef.current[cell.symbol];
+          const hasImg = img && img.complete && img.naturalWidth > 0;
+          if (hasImg) {
+            const padding = 6;
+            const drawX = x + padding;
+            const drawY = y + padding;
+            const drawSize = CELL_SIZE - padding * 2;
+            ctx.drawImage(img, drawX, drawY, drawSize, drawSize);
+          } else {
+            ctx.font = '40px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = 'white';
+            ctx.fillText(cell.symbol, x + CELL_SIZE / 2, y + CELL_SIZE / 2);
+          }
 
           if (cell.multiplier > 1) {
             ctx.font = 'bold 24px Arial';
@@ -66,7 +132,7 @@ export function GameCanvas({
         }
       }
     }
-  }, [grid, spinning, winningCells, isFreeSpins, pulseStateRef, lastPulseTimeRef]);
+  }, [grid, spinning, winningCells, isFreeSpins, pulseStateRef, lastPulseTimeRef, imagesReadyVersion]);
 
   return (
     <div className="css-canvas-container">
