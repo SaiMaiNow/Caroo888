@@ -55,6 +55,7 @@ const initialState = {
     gamelock: [],
     code: null,
     isLoggedIn: false,
+    isDataLoaded: false,
     loading: false,
     error: null,
 }
@@ -83,6 +84,7 @@ export const userSlice = createSlice({
                 state.gamelock = action.payload.gamelock
                 state.code = action.payload.code
                 state.isLoggedIn = true
+                state.isDataLoaded = true
             } 
             else if (action.type.includes('login')) {
                 state.isLoggedIn = true
