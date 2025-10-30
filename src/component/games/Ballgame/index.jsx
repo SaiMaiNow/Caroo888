@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { addBalance, subtractBalance } from "../../../features/user/userSlice";
+
 const TIME = 15;
 const TEAMS = [
   { name: "Liverpool", pts: 0, p: 0, w: 0, d: 0, l: 0 },
@@ -29,13 +33,16 @@ const MockUSER = { name: "Player1", luck: 55, bal: 5000, bets: [] };
 
 function FootballLuckGameMiniStyled({ className }) {
   const [teams, setTeams] = useState(TEAMS);
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [matches, setMatches] = useState([]);
   const [resultsLog, setResultsLog] = useState([]);
   const [betsLog, setBetsLog] = useState([]);
   const [timer, setTimer] = useState(TIME);
   const [isBetting, setIsBetting] = useState(true);
   const [user, setUser] = useState(MockUSER);
-  const [betAmount, setBetAmount] = useState(100);
+  const [betAmount] = useState(100);
   const timerRef = useRef();
   const [roundEnded, setRoundEnded] = useState(false);
 
@@ -43,7 +50,7 @@ function FootballLuckGameMiniStyled({ className }) {
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [tempTeam, setTempTeam] = useState("");
   const [tempAmount, setTempAmount] = useState("");
-  const [results, setResults] = useState([]);
+  const [, setResults] = useState([]);
   const [fadeState, setFadeState] = useState("fade-in");
 
   const randomScore = () => Math.floor(Math.random() * 11);
@@ -52,42 +59,49 @@ function FootballLuckGameMiniStyled({ className }) {
     [team]: Math.floor(Math.random() * 4),
     [opp]: Math.floor(Math.random() * 6) + 5,
   });
+  const users = useSelector((state) => state.user);
+  console.log("user:", users);
+  const navigates = useNavigate();
+  const dispatchs = useDispatch();
 
-  const rate = () => Number((1.4 + Math.random() * 0.6).toFixed(2)); // 1.4 - 2.0
+    useEffect(() => {
+    if (!users.isLoggedIn) {
+      // return navigate('/');
+    }
+  }, [user.isLoggedIn]);
+
   const getRate = (teamPts, oppPts) => {
-  // Base rate = 1.2 - 2.5
-  let diff = oppPts - teamPts; // ถ้า diff > 0 แสดงว่าทีมเราน้อยกว่า
-  let rate = 1.5 + diff * 0.05; // diff บวกเล็กน้อยเพิ่มเรท
-  // จำกัดให้อยู่ระหว่าง 1.3 ถึง 3.0
-  rate = Math.max(1.3, Math.min(rate, 3.0));
-  return Number(rate.toFixed(2));
-};
-const genMatches = () => {
-  const shuffled = [...teams].sort(() => Math.random() - 0.5);
-  const newMatches = [
-    {
-      teamA: shuffled[0].name,
-      teamB: shuffled[1].name,
-      rates: [
-        getRate(shuffled[0].pts, shuffled[1].pts), // ทีม A ชนะ
-        1,                                        // เสมอ
-        getRate(shuffled[1].pts, shuffled[0].pts)  // ทีม B ชนะ
-      ],
-    },
-    {
-      teamA: shuffled[2].name,
-      teamB: shuffled[3].name,
-      rates: [
-        getRate(shuffled[2].pts, shuffled[3].pts),
-        1,
-        getRate(shuffled[3].pts, shuffled[2].pts)
-      ],
-    },
-  ];
-  setMatches(newMatches);
-};
-
-
+    // Base rate = 1.2 - 2.5
+    let diff = oppPts - teamPts; // ถ้า diff > 0 แสดงว่าทีมเราน้อยกว่า
+    let rate = 1.5 + diff * 0.05; // diff บวกเล็กน้อยเพิ่มเรท
+    // จำกัดให้อยู่ระหว่าง 1.3 ถึง 3.0
+    rate = Math.max(1.3, Math.min(rate, 3.0));
+    return Number(rate.toFixed(2));
+  };
+  const genMatches = () => {
+    const shuffled = [...teams].sort(() => Math.random() - 0.5);
+    const newMatches = [
+      {
+        teamA: shuffled[0].name,
+        teamB: shuffled[1].name,
+        rates: [
+          getRate(shuffled[0].pts, shuffled[1].pts), // ทีม A ชนะ
+          1, // เสมอ
+          getRate(shuffled[1].pts, shuffled[0].pts), // ทีม B ชนะ
+        ],
+      },
+      {
+        teamA: shuffled[2].name,
+        teamB: shuffled[3].name,
+        rates: [
+          getRate(shuffled[2].pts, shuffled[3].pts),
+          1,
+          getRate(shuffled[3].pts, shuffled[2].pts),
+        ],
+      },
+    ];
+    setMatches(newMatches);
+  };
 
   // ป้องกันเรียก endRound ซ้ำ: ใช้ roundEnded flag
   useEffect(() => {
@@ -117,6 +131,9 @@ const genMatches = () => {
 
     const amt = Number(tempAmount || betAmount);
     if (amt <= 0 || isNaN(amt)) return alert("กรุณากรอกจำนวนเดิมพันที่ถูกต้อง");
+    // ตรวจสอบยอดเพียงพอ
+    if (amt > user.bal) return alert("ยอดเงินไม่พอสำหรับเดิมพันนี้");
+
     if (
       user.bets.find(
         (b) =>
@@ -183,6 +200,9 @@ const genMatches = () => {
     // เริ่ม fade out
     setFadeState("fade-out");
 
+    // เก็บ snapshot ของ user เพื่อป้องกัน stale state ภายใน setTimeout
+    const userSnapshot = { ...user, bets: [...user.bets] };
+
     setTimeout(() => {
       const now = new Date();
       const dateStr = `${now.getDate()}/${now.getMonth() + 1}`;
@@ -193,14 +213,16 @@ const genMatches = () => {
 
       // สร้างผลแต่ละแมตช์ (clone ข้อมูลที่จะเก็บ)
       const matchResults = matches.map((m) => {
-        const betForThisMatch = user.bets.find(
+        const betForThisMatch = userSnapshot.bets.find(
           (b) => b.teamA === m.teamA && b.teamB === m.teamB
         );
 
         let scoreTeamA, scoreTeamB;
         if (betForThisMatch) {
-          if (checkLuck(user.luck)) {
+          if (checkLuck(userSnapshot.luck)) {
+            // ลด luck จริงของ user โดยใช้ functional update เพื่อความปลอดภัย
             setUser((u) => ({ ...u, luck: Math.max(0, u.luck - 5) }));
+            scoreTeamA = randomScore();
             scoreTeamA = randomScore();
             scoreTeamB = randomScore();
           } else {
@@ -303,7 +325,7 @@ const genMatches = () => {
 
       // คำนวณ gain และอัปเดตยอดผู้เล่น
       let gain = 0;
-      user.bets.forEach((b) => {
+      userSnapshot.bets.forEach((b) => {
         const r = matchResults.find(
           (mr) => mr.teamA === b.teamA && mr.teamB === b.teamB
         );
@@ -670,10 +692,10 @@ export default styled(FootballLuckGameMiniStyled)`
     justify-content: space-between;
     align-items: center;
   }
-    .matchCard .teamColumn {
-  width: 100px; /* fix width เท่ากัน */
-  flex-shrink: 0;
-}
+  .matchCard .teamColumn {
+    width: 100px; /* fix width เท่ากัน */
+    flex-shrink: 0;
+  }
   .matchCard .logo {
     background: #00eaff;
     color: #000;
