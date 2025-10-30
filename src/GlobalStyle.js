@@ -5,6 +5,9 @@ const GlobalStyle = createGlobalStyle`
         box-sizing: border-box;
         margin: 0;
         padding: 0;
+    }
+
+    html, body {
         background-color: #141414;
     }
 `;

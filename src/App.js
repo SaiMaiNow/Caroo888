@@ -6,6 +6,7 @@ import Navbar from './component/Navbar';
 import Test from "./component/Test"
 import Admin from "./component/Admin"
 import UserDetailPage from './component/UserDetailPage';
+import Auth from "./component/Auth"
 
 function App() {
   return (
