@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import styled, { createGlobalStyle } from "styled-components";
-
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom';
+import { addBalance, subtractBalance } from '../../../features/user/userSlice';
 
 function Baccarat({ className }) {
   const [balance, setBalance] = useState(5000);
@@ -11,6 +13,10 @@ function Baccarat({ className }) {
   const [history, setHistory] = useState([]);
   const [cards, setCards] = useState({ player: [], banker: [], points: { p: 0, b: 0 } });
   const timerRef = useRef(null);
+  const user = useSelector((state) => state.user);
+  console.log("user:", user);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const BET_OPTIONS = [
     { id: "player", label: "Player", color: "blue", rate: 2 },
@@ -90,6 +96,12 @@ function Baccarat({ className }) {
     return () => clearInterval(timerRef.current);
   }, [isBetting]);
 
+  useEffect(() => {
+    if (!user.isLoggedIn) {
+      // return navigate('/');
+    }
+  }, [user.isLoggedIn]);
+
   const dealBaccarat = () => {
     const suits = ["C", "D", "H", "S"];
     const deck = suits.flatMap((suit) =>
@@ -122,39 +134,48 @@ function Baccarat({ className }) {
   };
 
 
-  const placeBet = (option) => {
+  // const placeBet = (option) => {
+  //   if (!isBetting) return;
+  //   setBets((prev) => {
+  //     const copy = [...prev];
+  //     const idx = copy.findIndex((b) => b.option === option);
+  //     if (idx >= 0) copy[idx].amount += selectedChip;
+  //     else copy.push({ option, amount: selectedChip });
+  //     return copy;
+  //   });
+  // };
+
+  // const confirmBet = () => {
+  //   const total = bets.reduce((s, b) => s + b.amount, 0);
+  //   if (total > user.balance) {
+  //     alert("ยอดเดิมพันมากกว่ายอดในบัญชี");
+  //     return;
+  //   }
+  //   dispatch(subtractBalance({ amount: total }));
+  // };
+
+  const handleBet = (option) => {
     if (!isBetting) return;
+
+    const newBet = { option, amount: selectedChip };
+
+    if (user.balance < selectedChip) {
+      alert("ยอดเดิมพันมากกว่ายอดในบัญชี");
+      return;
+    }
+
     setBets((prev) => {
       const copy = [...prev];
       const idx = copy.findIndex((b) => b.option === option);
       if (idx >= 0) copy[idx].amount += selectedChip;
-      else copy.push({ option, amount: selectedChip });
+      else copy.push(newBet);
       return copy;
     });
+
+    dispatch(subtractBalance({ amount: selectedChip }));
   };
 
-  const confirmBet = () => {
-    const total = bets.reduce((s, b) => s + b.amount, 0);
-    if (total > balance) {
-      alert("ยอดเดิมพันมากกว่ายอดในบัญชี");
-      return;
-    }
-    setBalance((b) => b - total);
-  };
 
-  const cancelBet = () => setBets([]);
-
-  const repeatBet = () => {
-    if (history.length === 0) return;
-    const last = history[0].bets;
-    const total = last.reduce((s, b) => s + b.amount, 0);
-    if (total > balance) {
-      alert("ไม่พอเงินสำหรับวางเดิมพันซ้ำ");
-      return;
-    }
-    setBets(last.map((b) => ({ ...b })));
-    setBalance((b) => b - total);
-  };
 
   const revealResult = () => {
     const gameResult = dealBaccarat();
@@ -168,8 +189,10 @@ function Baccarat({ className }) {
       }
     });
 
+
+
     setTimeout(() => {
-      setBalance((b) => b + payout);
+      dispatch(addBalance({ amount: payout }));
       setHistory((h) => [result, ...h]);
       setBets([]);
       setCards({ player, banker, points });
@@ -192,7 +215,7 @@ function Baccarat({ className }) {
             </div>
           </div>
           <div className="balance-box">
-            <span>Balance:</span> ฿ {balance.toFixed(2)}
+            <span>Balance:</span> ฿ {user.balance}
           </div>
         </header>
 
@@ -244,8 +267,7 @@ function Baccarat({ className }) {
                   <div className="bet-rate">1 : {opt.rate}</div>
                   <button
                     className={`bet-btn ${opt.color}`}
-                    onClick={() => placeBet(opt.id)}
-                  >
+                    onClick={() => handleBet(opt.id)}>
                     วางชิป
                   </button>
                   <div className="bet-amount">
@@ -270,12 +292,10 @@ function Baccarat({ className }) {
           <section className="player glass">
             <h3>Player Info</h3>
             <br></br>
-            <p>ID: bookbento</p>
+            <p>ID: {user.firstname} {user.lastname}</p>
             <br></br>
             <p>Rounds played: {history.length}</p>
             <br></br>
-            <button onClick={() => setBalance((b) => b + 1000)}>เติมเงิน +฿1000</button>
-            <button onClick={() => setBalance(1000)}>รีเซ็ตยอด</button>
           </section>
         </main>
 
@@ -283,11 +303,13 @@ function Baccarat({ className }) {
 
         <div className="floating glass">
           <div>ยอดเดิมพัน: {totalPending}</div>
-          <div className="btn-group">
+
+          {/* <div className="btn-group">
             <button onClick={confirmBet}>ยืนยัน</button>
             <button onClick={cancelBet}>ยกเลิก</button>
             <button onClick={repeatBet}>วางซ้ำ</button>
-          </div>
+          </div> */}
+
         </div>
       </div>
     </div>
