@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
+
+import { fetchUser } from '../../features/user/userSlice'
 
 import LoginForm from './loginform'
 import RegisterFrom from './registerfrom'
@@ -10,12 +13,24 @@ import RegisterFrom from './registerfrom'
 const Auth = ({ className }) => {
   const { type } = useParams()
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const user = useSelector((state) => state.user)
 
   useEffect(() => {
     if (type !== 'login' && type !== 'register') {
       navigate('/')
     }
   }, [type, navigate])
+
+  useEffect(() => {
+    dispatch(fetchUser())
+  }, [dispatch])
+
+  useEffect(() => {
+    if (user.isLoggedIn && user.isDataLoaded) {
+      navigate('/')
+    }
+  }, [user.isLoggedIn, user.isDataLoaded, navigate])
 
   return (
     <div className={className}>

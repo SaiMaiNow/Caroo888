@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
 import { useDispatch, useSelector } from 'react-redux'
-import { register, fetchUser } from '../../features/user/userSlice'
+import { register } from '../../features/user/userSlice'
 
 const RegisterForm = ({ className }) => {
   const [firstname, setFirstname] = useState('')
@@ -14,11 +14,8 @@ const RegisterForm = ({ className }) => {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [agentCode, setAgentCode] = useState('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const dispatch = useDispatch()
-  const navigate = useNavigate()
-
   const user = useSelector((state) => state.user)
 
   const handleRegister = (e) => {
@@ -35,19 +32,6 @@ const RegisterForm = ({ className }) => {
     
     dispatch(register({firstname: firstname, lastname: lastname, phoneNumber: phoneNumber, password: password, confirmPassword: confirmPassword}))
   }
-
-  useEffect(() => {
-    if (!user.isLoggedIn) {
-      console.log('fetching user')
-      dispatch(fetchUser())
-    }
-  }, [user.isLoggedIn])
-  
-  useEffect(() => {
-    if (user.isLoggedIn) {
-      navigate('/')
-    }
-  }, [user.isLoggedIn, navigate])
 
   useEffect(() => {
     if (user.error) {

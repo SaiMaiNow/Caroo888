@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
 import { useDispatch, useSelector } from 'react-redux'
-import { login, fetchUser } from '../../features/user/userSlice'
+import { login } from '../../features/user/userSlice'
 
 const LoginForm = ({ className }) => {
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -12,7 +12,6 @@ const LoginForm = ({ className }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const dispatch = useDispatch()
-  const navigate = useNavigate()
 
   const user = useSelector((state) => state.user)
 
@@ -25,19 +24,6 @@ const LoginForm = ({ className }) => {
     
     dispatch(login({phoneNumber: phoneNumber, password: password}))
   }
-
-  useEffect(() => {
-    if (!user.isLoggedIn) {
-      console.log('fetching user')
-      dispatch(fetchUser())
-    }
-  }, [user.isLoggedIn])
-
-  useEffect(() => {
-    if (user.isLoggedIn) {
-      navigate('/')
-    }
-  }, [user.isLoggedIn, navigate])
 
   useEffect(() => {
     if (user.error) {
