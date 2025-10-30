@@ -37,6 +37,7 @@ function FootballLuckGameMiniStyled({ className }) {
   const [user, setUser] = useState(MockUSER);
   const [betAmount, setBetAmount] = useState(100);
   const timerRef = useRef();
+  const [roundEnded, setRoundEnded] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -53,48 +54,77 @@ function FootballLuckGameMiniStyled({ className }) {
   });
 
   const rate = () => Number((1.4 + Math.random() * 0.6).toFixed(2)); // 1.4 - 2.0
-  const genMatches = () => {
-    const shuffled = [...teams].sort(() => Math.random() - 0.5);
-    const newMatches = [
-      {
-        teamA: shuffled[0].name,
-        teamB: shuffled[1].name,
-        rates: [rate(), 1, rate()],
-      },
-      {
-        teamA: shuffled[2].name,
-        teamB: shuffled[3].name,
-        rates: [rate(), 1, rate()],
-      },
-    ];
-    setMatches(newMatches);
-  };
+  const getRate = (teamPts, oppPts) => {
+  // Base rate = 1.2 - 2.5
+  let diff = oppPts - teamPts; // ถ้า diff > 0 แสดงว่าทีมเราน้อยกว่า
+  let rate = 1.5 + diff * 0.05; // diff บวกเล็กน้อยเพิ่มเรท
+  // จำกัดให้อยู่ระหว่าง 1.3 ถึง 3.0
+  rate = Math.max(1.3, Math.min(rate, 3.0));
+  return Number(rate.toFixed(2));
+};
+const genMatches = () => {
+  const shuffled = [...teams].sort(() => Math.random() - 0.5);
+  const newMatches = [
+    {
+      teamA: shuffled[0].name,
+      teamB: shuffled[1].name,
+      rates: [
+        getRate(shuffled[0].pts, shuffled[1].pts), // ทีม A ชนะ
+        1,                                        // เสมอ
+        getRate(shuffled[1].pts, shuffled[0].pts)  // ทีม B ชนะ
+      ],
+    },
+    {
+      teamA: shuffled[2].name,
+      teamB: shuffled[3].name,
+      rates: [
+        getRate(shuffled[2].pts, shuffled[3].pts),
+        1,
+        getRate(shuffled[3].pts, shuffled[2].pts)
+      ],
+    },
+  ];
+  setMatches(newMatches);
+};
 
+
+
+  // ป้องกันเรียก endRound ซ้ำ: ใช้ roundEnded flag
   useEffect(() => {
-    if (timer <= 0) {
+    if (timer <= 0 && !roundEnded) {
+      setRoundEnded(true);
       if (showModal) {
         setShowModal(false);
         alert("หมดเวลาวางเดิมพันแล้ว!");
       }
       endRound();
     }
-  }, [timer]);
+  }, [timer, roundEnded]); // eslint-disable-line
 
-  useEffect(() => genMatches(), []);
+  useEffect(() => genMatches(), []); // สุ่มแมตช์เริ่มต้น
   useEffect(() => {
     if (!isBetting) return;
     timerRef.current = setInterval(() => setTimer((t) => t - 1), 1000);
     return () => clearInterval(timerRef.current);
   }, [isBetting]);
-  useEffect(() => {
-    if (timer <= 0) endRound();
-  }, [timer]);
 
+  // --- confirmBet: clone match data ก่อนเก็บ, เก็บ amt เป็นตัวเดียว, update user ด้วย functional updater
   const confirmBet = (matchIndex, team) => {
-    if (!isBetting) return;
+    if (!isBetting) {
+      alert("หมดเวลาวางเดิมพันแล้ว!");
+      return;
+    }
+
     const amt = Number(tempAmount || betAmount);
-    if (amt <= 0 || user.bal < amt) return alert("ยอดเงินไม่พอ");
-    if (user.bets.find((b) => b.match === matchIndex))
+    if (amt <= 0 || isNaN(amt)) return alert("กรุณากรอกจำนวนเดิมพันที่ถูกต้อง");
+    if (
+      user.bets.find(
+        (b) =>
+          b.match === matchIndex &&
+          b.teamA === matches[matchIndex].teamA &&
+          b.teamB === matches[matchIndex].teamB
+      )
+    )
       return alert("คุณเดิมพันคู่นี้แล้ว");
 
     const now = new Date();
@@ -103,7 +133,7 @@ function FootballLuckGameMiniStyled({ className }) {
       2,
       "0"
     )}`;
-    const m = matches[matchIndex];
+    const m = { ...matches[matchIndex] }; // clone match object เพื่อป้องกัน reference
     const teamRate =
       team === m.teamA ? m.rates[0] : team === m.teamB ? m.rates[2] : 1;
 
@@ -114,21 +144,32 @@ function FootballLuckGameMiniStyled({ className }) {
       rate: teamRate,
       date: dateStr,
       time: timeStr,
+      teamA: m.teamA,
+      teamB: m.teamB,
     };
-    setUser({ ...user, bal: user.bal - amt, bets: [...user.bets, payload] });
 
+    // ลดยอดผู้เล่น & เติม bet ลงใน user.bets (functional update)
+    setUser((prev) => ({
+      ...prev,
+      bal: prev.bal - amt,
+      bets: [...prev.bets, payload],
+    }));
+
+    // เก็บ log เป็น copy (ไม่ชี้ไปยัง matches)
     setBetsLog((prev) => [
       ...prev,
       {
         ...payload,
-        teamA: m.teamA,
-        teamB: m.teamB,
-        sA: null,
-        sB: null,
+        scoreTeamA: null,
+        scoreTeamB: null,
         won: null,
         betType: "รอผล",
+        payout: 0,
       },
     ]);
+
+    // รีเซ็ต tempAmount (UX)
+    setTempAmount("");
   };
 
   const endRound = () => {
@@ -139,7 +180,7 @@ function FootballLuckGameMiniStyled({ className }) {
     setIsBetting(false);
     clearInterval(timerRef.current);
 
-    // 👇 เริ่ม fade out ก่อนเปลี่ยนแมตช์
+    // เริ่ม fade out
     setFadeState("fade-out");
 
     setTimeout(() => {
@@ -150,65 +191,147 @@ function FootballLuckGameMiniStyled({ className }) {
         "0"
       )}`;
 
-      const matchResults = matches.map((m, i) => {
-        const bet = user.bets.find((b) => b.match === i);
-        let sA, sB;
-        if (bet) {
+      // สร้างผลแต่ละแมตช์ (clone ข้อมูลที่จะเก็บ)
+      const matchResults = matches.map((m) => {
+        const betForThisMatch = user.bets.find(
+          (b) => b.teamA === m.teamA && b.teamB === m.teamB
+        );
+
+        let scoreTeamA, scoreTeamB;
+        if (betForThisMatch) {
           if (checkLuck(user.luck)) {
-            setUser((u) => ({ ...u, luck: u.luck - 5 }));
-            sA = randomScore();
-            sB = randomScore();
+            setUser((u) => ({ ...u, luck: Math.max(0, u.luck - 5) }));
+            scoreTeamA = randomScore();
+            scoreTeamB = randomScore();
           } else {
             const forced = forceLose(
-              bet.team,
-              bet.team === m.teamA ? m.teamB : m.teamA
+              betForThisMatch.team,
+              betForThisMatch.team === m.teamA ? m.teamB : m.teamA
             );
-            sA = forced[m.teamA];
-            sB = forced[m.teamB];
+            scoreTeamA =
+              typeof forced[m.teamA] === "number"
+                ? forced[m.teamA]
+                : randomScore();
+            scoreTeamB =
+              typeof forced[m.teamB] === "number"
+                ? forced[m.teamB]
+                : randomScore();
           }
         } else {
-          sA = randomScore();
-          sB = randomScore();
+          scoreTeamA = randomScore();
+          scoreTeamB = randomScore();
         }
-        const win = sA > sB ? m.teamA : sB > sA ? m.teamB : "draw";
-        return { ...m, sA, sB, win, date: dateStr, time: timeStr };
+
+        const win =
+          scoreTeamA > scoreTeamB
+            ? m.teamA
+            : scoreTeamB > scoreTeamA
+            ? m.teamB
+            : "draw";
+
+        return {
+          teamA: m.teamA,
+          teamB: m.teamB,
+          rates: [...m.rates],
+          scoreTeamA,
+          scoreTeamB,
+          win,
+          date: dateStr,
+          time: timeStr,
+        };
       });
 
-      setResultsLog((prev) => [...prev, ...matchResults]);
-      // เพิ่มหลัง setResultsLog(...)
-      setBetsLog((prev) =>
-        prev.map((b) => {
-          const r = matchResults[b.match];
-          const isWin = r.win === b.team;
+      // --- อัปเดตตารางคะแนนทีม ---
+      setTeams((prevTeams) =>
+        prevTeams.map((team) => {
+          const matchForTeam = matchResults.find(
+            (m) => m.teamA === team.name || m.teamB === team.name
+          );
+          if (!matchForTeam) return team;
+
+          let newTeam = { ...team, p: team.p + 1 };
+
+          if (matchForTeam.win === "draw") {
+            newTeam.d = team.d + 1;
+            newTeam.pts = team.pts + 1;
+          } else if (matchForTeam.win === team.name) {
+            newTeam.w = team.w + 1;
+            newTeam.pts = team.pts + 3;
+          } else {
+            newTeam.l = team.l + 1;
+          }
+
+          return newTeam;
+        })
+      );
+
+      // อัปเดต betsLog
+      setBetsLog((prevBets) =>
+        prevBets.map((bet) => {
+          const result = matchResults.find(
+            (r) => r.teamA === bet.teamA && r.teamB === bet.teamB
+          );
+          if (!result) return { ...bet };
+
+          let isWinner = false;
+          let payoutAmount = 0;
+          let outcomeLabel = "";
+
+          if (result.win === "draw") {
+            outcomeLabel = "เสมอ";
+            payoutAmount = 0;
+          } else if (result.win === bet.team) {
+            outcomeLabel = "ชนะ";
+            isWinner = true;
+            payoutAmount = Math.round(bet.amt * bet.rate);
+          } else {
+            outcomeLabel = "แพ้";
+            payoutAmount = -bet.amt;
+          }
+
           return {
-            ...b,
-            sA: r.sA,
-            sB: r.sB,
-            won: isWin,
-            betType: isWin ? "ชนะ" : r.win === "draw" ? "เสมอ" : "แพ้",
-            endTime: `${r.time}`, // 🕒 เวลาจบแมตช์
+            ...bet,
+            scoreTeamA: result.scoreTeamA,
+            scoreTeamB: result.scoreTeamB,
+            won: isWinner,
+            betType: outcomeLabel,
+            endTime: result.time,
+            payout: payoutAmount,
           };
         })
       );
 
+      // คำนวณ gain และอัปเดตยอดผู้เล่น
       let gain = 0;
       user.bets.forEach((b) => {
-        const r = matchResults[b.match];
+        const r = matchResults.find(
+          (mr) => mr.teamA === b.teamA && mr.teamB === b.teamB
+        );
+        if (!r) return;
         if (r.win === b.team) gain += Math.round(b.amt * b.rate);
       });
 
       setUser((u) => ({ ...u, bal: u.bal + gain, bets: [] }));
-      setResults(matchResults);
 
-      // ⏳ หลังแสดงผล 2.5 วิ → fade in รอบใหม่
+      // เก็บผลเพื่อแสดงชั่วคราว
+      setResults(matchResults.map((r) => ({ ...r })));
+
+      // append resultsLog
+      setResultsLog((prev) => [
+        ...prev,
+        ...matchResults.map((r) => ({ ...r })),
+      ]);
+
+      // รีเซ็ตรอบใหม่
       setTimeout(() => {
         setResults([]);
         genMatches();
         setTimer(TIME);
         setIsBetting(true);
         setFadeState("fade-in");
-      }, 2500);
-    }, 300); // fade out ใช้เวลา 0.3 วินาที
+        setRoundEnded(false);
+      }, 2000);
+    }, 100);
   };
 
   return (
@@ -239,18 +362,21 @@ function FootballLuckGameMiniStyled({ className }) {
               </tr>
             </thead>
             <tbody>
-              {teams.map((t, i) => (
-                <tr key={t.name}>
-                  <td>{i + 1}</td>
-                  <td>{t.name}</td>
-                  <td>{t.p}</td>
-                  <td>{t.w}</td>
-                  <td>{t.d}</td>
-                  <td>{t.l}</td>
-                  <td>{t.pts}</td>
-                </tr>
-              ))}
+              {[...teams]
+                .sort((a, b) => b.pts - a.pts)
+                .map((t, i) => (
+                  <tr key={t.name}>
+                    <td>{i + 1}</td>
+                    <td>{t.name}</td>
+                    <td>{t.p}</td>
+                    <td>{t.w}</td>
+                    <td>{t.d}</td>
+                    <td>{t.l}</td>
+                    <td>{t.pts}</td>
+                  </tr>
+                ))}
             </tbody>
+            <br />
           </table>
         </div>
 
@@ -259,23 +385,34 @@ function FootballLuckGameMiniStyled({ className }) {
           <div className="banner">ภาพโฆษณา</div>
           <div className="matches">
             {matches.map((m, i) => {
-              const betForMatch = user.bets.find((b) => b.match === i);
+              const betForMatch = user.bets.find(
+                (b) => b.teamA === m.teamA && b.teamB === m.teamB
+              );
               return (
                 <div className={`matchCard ${fadeState}`} key={i}>
                   <div className="header">
-                    <div className="logo">Logo</div>
+                    <div className="teamColumn">
+                      <div className="logo">Logo</div>
+                      <br />
+                      <div className="teamName">{m.teamA}</div>
+                    </div>
+
                     <div className="date">
                       28/10
                       <br />
                       <small>{timer}s</small>
                     </div>
-                    <div className="logo">Logo</div>
+
+                    <div className="teamColumn">
+                      <div className="logo">Logo</div>
+                      <br />
+                      <div className="teamName">{m.teamB}</div>
+                    </div>
                   </div>
-                  <div className="teams">
-                    <span>{m.teamA}</span>
-                    <span>{m.teamB}</span>
-                  </div>
-                  <div className="odds">
+
+                  <div className="headrates">Rates</div>
+
+                  <div className="rates">
                     {m.rates.map((r, idx) => (
                       <span
                         key={idx}
@@ -285,9 +422,13 @@ function FootballLuckGameMiniStyled({ className }) {
                       </span>
                     ))}
                   </div>
-                  {betForMatch && (
+                  {betForMatch ? (
                     <div className="betInfo">
                       เดิมพัน {betForMatch.team} จำนวน {betForMatch.amt}฿
+                    </div>
+                  ) : (
+                    <div className="betInfo" style={{ visibility: "hidden" }}>
+                      placeholder
                     </div>
                   )}
                   <button
@@ -322,7 +463,14 @@ function FootballLuckGameMiniStyled({ className }) {
               ) : (
                 [...resultsLog].reverse().map((r, i) => (
                   <p key={i}>
-                    {r.date} {r.teamA} {r.sA}-{r.sB} {r.teamB} [{r.win}]
+                    ผู้ชนะ: [{r.win}] ชนะ
+                    <br />
+                    ผลการแข่งขัน: {r.teamA} {r.scoreTeamA}-{r.scoreTeamB}{" "}
+                    {r.teamB} <br />
+                    วันที่แข่ง: {r.date} <br />
+                    เวลาจบแมตช์: {r.time}ิ
+                    <br />
+                    --------------------------------------------
                   </p>
                 ))
               )}
@@ -331,27 +479,39 @@ function FootballLuckGameMiniStyled({ className }) {
           <div className="section">
             <h3>ผลการเดิมพัน</h3>
             <div className="resultBox">
-{betsLog.length === 0 ? (
-  <p>ยังไม่มีการเดิมพัน</p>
-) : (
-  betsLog
-    .filter((b) => b.won !== null)
-    .reverse()
-    .map((b, i) => (
-      <p key={i}>
-        ผลการเดิมพัน: {b.betType} เดิมพัน :({b.team})<br />
-        ผลการแข่งขัน: {b.teamA} {b.sA}-{b.sB} {b.teamB}<br />
-        เวลาจบแมตช์: {b.endTime}
-      </p>
-    ))
-)}
-
+              {betsLog.length === 0 ? (
+                <p>ยังไม่มีการเดิมพัน</p>
+              ) : (
+                betsLog
+                  .filter((b) => b.betType !== "รอผล")
+                  .reverse()
+                  .map((b, i) => (
+                    <p key={i}>
+                      เดิมพัน :({b.team}) จำนวน: {b.amt}฿ เรท x{b.rate} <br />
+                      ผลการเดิมพัน: {b.betType}
+                      <br />
+                      ผลการแข่งขัน: {b.teamA} {b.scoreTeamA}-{b.scoreTeamB}{" "}
+                      {b.teamB}
+                      <br />
+                      วันที่แข่ง: {b.date} <br />
+                      เวลาจบแมตช์: {b.endTime} <br />
+                      เงินที่ได้/เสีย:{" "}
+                      {typeof b.payout === "number"
+                        ? b.payout >= 0
+                          ? `+฿${b.payout}`
+                          : `-฿${Math.abs(b.payout)}`
+                        : `฿0`}
+                      <br />
+                      --------------------------------------------
+                    </p>
+                  ))
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {showModal && (
+      {showModal && selectedMatch !== null && matches[selectedMatch] && (
         <div className="modalWrapper">
           <div className="modalBox">
             <h3>วางเดิมพัน</h3>
@@ -410,12 +570,17 @@ export default styled(FootballLuckGameMiniStyled)`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  .headrates {
+    font-size: 16px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+  }
 
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #1a1a1a;
+    background: #111;
     padding: 15px 30px;
     border-bottom: 2px solid #00eaff;
   }
@@ -488,7 +653,7 @@ export default styled(FootballLuckGameMiniStyled)`
     background: #111;
     border: 2px solid #00eaff;
     border-radius: 12px;
-    width: 230px;
+    width: 390px;
     text-align: center;
     padding: 30px;
   }
@@ -505,6 +670,10 @@ export default styled(FootballLuckGameMiniStyled)`
     justify-content: space-between;
     align-items: center;
   }
+    .matchCard .teamColumn {
+  width: 100px; /* fix width เท่ากัน */
+  flex-shrink: 0;
+}
   .matchCard .logo {
     background: #00eaff;
     color: #000;
@@ -525,15 +694,17 @@ export default styled(FootballLuckGameMiniStyled)`
     justify-content: space-between;
     margin-top: 6px;
   }
-  .matchCard .odds {
+  .matchCard .rates {
     display: flex;
     justify-content: center;
     gap: 8px;
     margin: 6px 0;
+    background: #111;
   }
-  .matchCard .odds span {
+  .matchCard .rates span {
     border: 1px solid #00eaff;
-    border-radius: 50%;
+    border-radius: 5%;
+    padding: 10px 50px;
     width: 40px;
     height: 40px;
     display: flex;
@@ -543,16 +714,15 @@ export default styled(FootballLuckGameMiniStyled)`
     background: #111;
     transition: 0.2s;
   }
-  .matchCard .odds span:hover {
-    background: #00eaff22;
-    color: #00eaff;
-  }
+
   .matchCard button {
     background: #00eaff;
     color: #000;
     border: none;
     border-radius: 20px;
+    width: 100%;
     font-weight: 700;
+    font-size: 16px;
     padding: 5px 15px;
     cursor: pointer;
     transition: 0.2s;
@@ -571,13 +741,13 @@ export default styled(FootballLuckGameMiniStyled)`
   .section h3 {
     color: #00eaff;
     border-bottom: 1px solid #00eaff;
-    padding-bottom: 4px;
+    padding: 10px;
   }
   .resultBox {
     background: #1c1c1c;
     border-radius: 6px;
     padding: 10px;
-    font-size: 13px;
+    font-size: 14px;
     height: 200px;
     overflow-y: auto;
   }
@@ -681,11 +851,24 @@ export default styled(FootballLuckGameMiniStyled)`
 
   .matchCard.fade-out {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(1);
   }
 
   .matchCard.fade-in {
     opacity: 1;
     transform: scale(1);
+  }
+  .matchCard .teamColumn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px; /* เว้นช่องว่างระหว่าง logo กับชื่อทีม */
+  }
+
+  .matchCard .teamName {
+    font-size: 14px;
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
   }
 `;
