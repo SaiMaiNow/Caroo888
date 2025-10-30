@@ -12,26 +12,26 @@ import {
 
 const TIME = 15;
 const TEAMS = [
-  { name: "Liverpool", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Man City", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Arsenal", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Chelsea", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Tottenham", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Man United", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Newcastle", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Aston Villa", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Brighton", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "West Ham", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Fulham", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Brentford", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Crystal Palace", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Wolves", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Everton", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Forest", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Leicester", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Leeds", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Bournemouth", pts: 0, p: 0, w: 0, d: 0, l: 0 },
-  { name: "Burnley", pts: 0, p: 0, w: 0, d: 0, l: 0 },
+  { name: "Liverpool", pts: 0, p: 0, w: 0, d: 0, l: 0 ,shortname:"LIV"},
+  { name: "Man City", pts: 0, p: 0, w: 0, d: 0, l: 0 ,shortname:"MCI" },
+  { name: "Arsenal", pts: 0, p: 0, w: 0, d: 0, l: 0   ,shortname:"ARS" },
+  { name: "Chelsea", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"CHE" },
+  { name: "Tottenham", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"TOT" },
+  { name: "Man United", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"MUN" },
+  { name: "Newcastle", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"NEW" },
+  { name: "Aston Villa", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"AVL" },
+  { name: "Brighton", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"BHA" },
+  { name: "West Ham", pts: 0, p: 0, w: 0, d: 0, l: 0    ,shortname:"WHU" },
+  { name: "Fulham", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"FUL" },
+  { name: "Brentford", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"BRE" },
+  { name: "Crystal Palace", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"CRY" },
+  { name: "Wolves", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"WOL" },
+  { name: "Everton", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"EVE" },
+  { name: "Forest", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"FOR" },
+  { name: "Leicester", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"LEI" },
+  { name: "Leeds", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"LEE" },
+  { name: "Bournemouth", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"BOU" },
+  { name: "Burnley", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"BUR" },
 ];
 
 //const MockUSER = { name: "Player1", luck: 55, bal: 5000, bets: [] };
@@ -66,16 +66,15 @@ function FootballLuckGameMiniStyled({ className }) {
     [opp]: Math.floor(Math.random() * 6) + 5,
   });
 
-  useEffect(() => {
-    dispatch(fetchUser());
-    //return navigate("/");
-  }, [dispatch]);
+useEffect(() => {
+    dispatch(fetchUser())
+  }, [dispatch])
 
   useEffect(() => {
-    if (!user.isLoggedIn) {
-     // return navigate("/");
+    if (!user.isLoggedIn && user.isDataLoaded) {
+      navigate('/')
     }
-  }, [user.isLoggedIn]);
+  }, [user.isLoggedIn, user.isDataLoaded, navigate])
 
   const getRate = (teamPts, oppPts) => {
     // Base rate = 1.2 - 2.5
@@ -418,7 +417,7 @@ function FootballLuckGameMiniStyled({ className }) {
 
         {/* center */}
         <div className="center">
-          <div className="banner">ภาพโฆษณา</div>
+          <div className="banner">Apex Ball</div>
           <div className="matches">
             {matches.map((m, i) => {
               const betForMatch = userBets.find(
@@ -428,19 +427,23 @@ function FootballLuckGameMiniStyled({ className }) {
                 <div className={`matchCard ${fadeState}`} key={i}>
                   <div className="header">
                     <div className="teamColumn">
-                      <div className="logo">Logo</div>
+                      <div className="shortname">        {
+          TEAMS.find(t => t.name === m.teamA)?.shortname || "?"
+        }</div>
                       <br />
                       <div className="teamName">{m.teamA}</div>
                     </div>
 
                     <div className="date">
-                      28/10
-                      <br />
+                       {m.date || new Date().toLocaleDateString("th-TH")}
+                      <br /><br />
                       <strong>{timer}s</strong>
                     </div>
 
                     <div className="teamColumn">
-                      <div className="logo">Logo</div>
+                      <div className="shortname">        {
+          TEAMS.find(t => t.name === m.teamB)?.shortname || "?"
+        }</div>
                       <br />
                       <div className="teamName">{m.teamB}</div>
                     </div>
@@ -675,6 +678,7 @@ export default styled(FootballLuckGameMiniStyled)`
   .banner {
     background: #00eaff;
     color: #000;
+    font-size: 32px;
     width: 100%;
     height: 180px;
     border-radius: 10px;
@@ -713,7 +717,7 @@ export default styled(FootballLuckGameMiniStyled)`
     width: 100px; /* fix width เท่ากัน */
     flex-shrink: 0;
   }
-  .matchCard .logo {
+  .matchCard .shortname {
     background: #00eaff;
     color: #000;
     font-weight: 600;
@@ -727,10 +731,16 @@ export default styled(FootballLuckGameMiniStyled)`
 .matchCard .date {
   font-size: 14px;
   color: #aaa;
-  padding-bottom: 10px;
+  
+  
 }
 
 .matchCard .date strong {
+border: 1px solid #00fbff;
+padding: 4px 8px;
+border-radius: 6px;
+
+  font-size: 16px;
   color: #00fbff;
 }
   .matchCard .teams {
