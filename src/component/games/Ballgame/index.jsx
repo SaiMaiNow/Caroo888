@@ -3,7 +3,12 @@ import styled from "styled-components";
 
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { addBalance, subtractBalance } from "../../../features/user/userSlice";
+import {
+  addBalance,
+  subtractBalance,
+  played,
+  fetchUser,
+} from "../../../features/user/userSlice";
 
 const TIME = 15;
 const TEAMS = [
@@ -29,19 +34,20 @@ const TEAMS = [
   { name: "Burnley", pts: 0, p: 0, w: 0, d: 0, l: 0 },
 ];
 
-const MockUSER = { name: "Player1", luck: 55, bal: 5000, bets: [] };
+//const MockUSER = { name: "Player1", luck: 55, bal: 5000, bets: [] };
 
 function FootballLuckGameMiniStyled({ className }) {
-  const [teams, setTeams] = useState(TEAMS);
-
+  const [teams, setTeams] = useState(TEAMS); //ตารางคะแนน
+  const user = useSelector((state) => state.user);
+  console.log("user:", user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [matches, setMatches] = useState([]);
-  const [resultsLog, setResultsLog] = useState([]);
-  const [betsLog, setBetsLog] = useState([]);
-  const [timer, setTimer] = useState(TIME);
-  const [isBetting, setIsBetting] = useState(true);
-  const [user, setUser] = useState(MockUSER);
+  const [matches, setMatches] = useState([]); //จับคู่
+  const [resultsLog, setResultsLog] = useState([]); //log ผลการแข่งขันทั้งหมด
+  const [betsLog, setBetsLog] = useState([]); //log ผลการเดิมพันทั้งหมด
+  const [timer, setTimer] = useState(TIME); //จับเวลา
+  const [isBetting, setIsBetting] = useState(true); //เปิด/ปิดการเดิมพัน
+  const [userBets, setUserBets] = useState([]); //เก็บการเดิมพันของผู้ใช้ current
   const [betAmount] = useState(100);
   const timerRef = useRef();
   const [roundEnded, setRoundEnded] = useState(false);
@@ -59,14 +65,14 @@ function FootballLuckGameMiniStyled({ className }) {
     [team]: Math.floor(Math.random() * 4),
     [opp]: Math.floor(Math.random() * 6) + 5,
   });
-  const users = useSelector((state) => state.user);
-  console.log("user:", users);
-  const navigates = useNavigate();
-  const dispatchs = useDispatch();
 
-    useEffect(() => {
-    if (!users.isLoggedIn) {
-      // return navigate('/');
+  useEffect(() => {
+    dispatch(fetchUser());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!user.isLoggedIn) {
+      //return navigate("/");
     }
   }, [user.isLoggedIn]);
 
@@ -132,7 +138,7 @@ function FootballLuckGameMiniStyled({ className }) {
     const amt = Number(tempAmount || betAmount);
     if (amt <= 0 || isNaN(amt)) return alert("กรุณากรอกจำนวนเดิมพันที่ถูกต้อง");
     // ตรวจสอบยอดเพียงพอ
-    if (amt > user.bal) return alert("ยอดเงินไม่พอสำหรับเดิมพันนี้");
+    if (amt > (user.balance ?? 0)) return alert("ยอดเงินไม่พอสำหรับเดิมพันนี้");
 
     if (
       user.bets.find(
@@ -165,12 +171,9 @@ function FootballLuckGameMiniStyled({ className }) {
       teamB: m.teamB,
     };
 
-    // ลดยอดผู้เล่น & เติม bet ลงใน user.bets (functional update)
-    setUser((prev) => ({
-      ...prev,
-      bal: prev.bal - amt,
-      bets: [...prev.bets, payload],
-    }));
+    // ลดยอดผู้เล่นผ่าน thunk (API) และเก็บ bet ลง local state
+    dispatch(subtractBalance({ amount: amt }));
+    setUserBets((prev) => [...prev, payload]);
 
     // เก็บ log เป็น copy (ไม่ชี้ไปยัง matches)
     setBetsLog((prev) => [
@@ -200,9 +203,13 @@ function FootballLuckGameMiniStyled({ className }) {
     // เริ่ม fade out
     setFadeState("fade-out");
 
-    // เก็บ snapshot ของ user เพื่อป้องกัน stale state ภายใน setTimeout
-    const userSnapshot = { ...user, bets: [...user.bets] };
 
+    //เก็บสำเนา (snapshot) ของ state ปัจจุบัน (user และ userBets) เพื่อป้องกันปัญหา stale state ภายใน setTimeout
+    const userSnapshot = { ...user };
+    const betsSnapshot = [...userBets];
+    //user อาจถูกอัปเดตจาก server แล้ว balance เปลี่ยน
+    //userBets อาจถูกล้างก่อนจบรอบ→ ผลเกมรอบนี้จะผิดเพี้ยน ❌
+  
     setTimeout(() => {
       const now = new Date();
       const dateStr = `${now.getDate()}/${now.getMonth() + 1}`;
@@ -213,15 +220,18 @@ function FootballLuckGameMiniStyled({ className }) {
 
       // สร้างผลแต่ละแมตช์ (clone ข้อมูลที่จะเก็บ)
       const matchResults = matches.map((m) => {
-        const betForThisMatch = userSnapshot.bets.find(
+        const betForThisMatch = betsSnapshot.find(
           (b) => b.teamA === m.teamA && b.teamB === m.teamB
         );
+      
+        console.log( userSnapshot.lucknumber);
+        console.log(user.lucknumber);
 
         let scoreTeamA, scoreTeamB;
         if (betForThisMatch) {
-          if (checkLuck(userSnapshot.luck)) {
-            // ลด luck จริงของ user โดยใช้ functional update เพื่อความปลอดภัย
-            setUser((u) => ({ ...u, luck: Math.max(0, u.luck - 5) }));
+          if (checkLuck(userSnapshot.lucknumber ?? 0)) {
+            // เรียก API/Thunk เพื่อปรับ luck ของ user (server จะคืนค่า lucknumber ใหม่)
+            dispatch(played());
             scoreTeamA = randomScore();
             scoreTeamA = randomScore();
             scoreTeamB = randomScore();
@@ -325,7 +335,7 @@ function FootballLuckGameMiniStyled({ className }) {
 
       // คำนวณ gain และอัปเดตยอดผู้เล่น
       let gain = 0;
-      userSnapshot.bets.forEach((b) => {
+      betsSnapshot.forEach((b) => {
         const r = matchResults.find(
           (mr) => mr.teamA === b.teamA && mr.teamB === b.teamB
         );
@@ -333,7 +343,10 @@ function FootballLuckGameMiniStyled({ className }) {
         if (r.win === b.team) gain += Math.round(b.amt * b.rate);
       });
 
-      setUser((u) => ({ ...u, bal: u.bal + gain, bets: [] }));
+      if (gain > 0) {
+        dispatch(addBalance({ amount: gain }));
+      }
+      setUserBets([]); // clear local bets
 
       // เก็บผลเพื่อแสดงชั่วคราว
       setResults(matchResults.map((r) => ({ ...r })));
@@ -363,7 +376,8 @@ function FootballLuckGameMiniStyled({ className }) {
           Apex <span>Ball</span>
         </h1>
         <div className="userInfo">
-          🍀 Luck {user.luck} 💰 ฿{user.bal} {user.name}
+          🍀 Luck {user.lucknumber} 💰 ฿{user.balance} {user.firstname}{" "}
+          {user.lastname}
         </div>
       </div>
 
@@ -398,8 +412,9 @@ function FootballLuckGameMiniStyled({ className }) {
                   </tr>
                 ))}
             </tbody>
-            <br />
+            
           </table>
+          <br />
         </div>
 
         {/* center */}
@@ -407,7 +422,7 @@ function FootballLuckGameMiniStyled({ className }) {
           <div className="banner">ภาพโฆษณา</div>
           <div className="matches">
             {matches.map((m, i) => {
-              const betForMatch = user.bets.find(
+              const betForMatch = userBets.find(
                 (b) => b.teamA === m.teamA && b.teamB === m.teamB
               );
               return (
@@ -638,14 +653,17 @@ export default styled(FootballLuckGameMiniStyled)`
     font-size: 12px;
     border-collapse: collapse;
     color: #ddd;
+
   }
   .sidebar-left th,
   td {
     padding: 4px;
     text-align: center;
+    padding: 6px;
   }
   .sidebar-left th {
     color: #00eaff;
+    border-bottom: 1px solid #00eaff;
   }
 
   .center {
