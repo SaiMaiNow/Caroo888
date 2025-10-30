@@ -3,6 +3,8 @@ import GlobalStyle from './GlobalStyle';
 
 import Home from "./component/Home"
 import Test from "./component/Test"
+import Auth from "./component/Auth"
+import NotFound from "./component/NotFound"
 
 function App() {
   return (
@@ -10,7 +12,9 @@ function App() {
       <GlobalStyle />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/Test" element={<Test />} />
+        <Route path="/test" element={<Test />} />
+        <Route path="/auth/:type" element={<Auth />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

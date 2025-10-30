@@ -18,11 +18,6 @@ export const register = createAsyncThunk('user/register', async (Data) => {
     return response.data;
 })
 
-export const logout = createAsyncThunk('user/logout', async () => {
-    const response = await axios.post(`${API_URL}/auth/logout`, {withCredentials: true});
-    return response.data;
-});
-
 export const addBalance = createAsyncThunk('user/addBalance', async (Data) => {
     const response = await axios.post(`${API_URL}/users/addBalance`, {amount: Data.amount}, { withCredentials: true })
     return response.data
@@ -44,7 +39,7 @@ export const deposit = createAsyncThunk('user/deposit', async (Data) => {
 });
 
 export const played = createAsyncThunk('user/played', async () => {
-    const response = await axios.post(`${API_URL}/luck/played`, {withCredentials: true});
+    const response = await axios.post(`${API_URL}/luck/played`, {}, { withCredentials: true });
     return response.data;
 });
 
@@ -60,6 +55,7 @@ const initialState = {
     gamelock: [],
     code: null,
     isLoggedIn: false,
+    isDataLoaded: false,
     loading: false,
     error: null,
 }
@@ -87,45 +83,14 @@ export const userSlice = createSlice({
                 state.lucknumber = action.payload.lucknumber
                 state.gamelock = action.payload.gamelock
                 state.code = action.payload.code
+                state.isLoggedIn = true
+                state.isDataLoaded = true
             } 
             else if (action.type.includes('login')) {
-                state.id = action.payload.id
-                state.role = action.payload.role
-                state.firstname = action.payload.firstname
-                state.lastname = action.payload.lastname
-                state.phoneNumber = action.payload.phoneNumber
-                state.balance = action.payload.balance
-                state.turn = action.payload.turn
-                state.lucknumber = action.payload.lucknumber
-                state.gamelock = action.payload.gamelock
-                state.code = action.payload.code
                 state.isLoggedIn = true
             }
             else if (action.type.includes('register')) {
-                state.id = action.payload.id
-                state.role = action.payload.role
-                state.firstname = action.payload.firstname
-                state.lastname = action.payload.lastname
-                state.phoneNumber = action.payload.phoneNumber
-                state.balance = action.payload.balance
-                state.turn = action.payload.turn
-                state.lucknumber = action.payload.lucknumber
-                state.gamelock = action.payload.gamelock
-                state.code = action.payload.code
                 state.isLoggedIn = true
-            }
-            else if (action.type.includes('logout')) {
-                state.id = null
-                state.role = null
-                state.firstname = null
-                state.lastname = null
-                state.phoneNumber = null
-                state.balance = null
-                state.turn = null
-                state.lucknumber = null
-                state.gamelock = []
-                state.code = null
-                state.isLoggedIn = false
             }
             else if (action.type.includes('addBalance')) {
                 state.balance = action.payload.balance
@@ -145,7 +110,39 @@ export const userSlice = createSlice({
         })
         builder.addMatcher((action) => action.type.endsWith('/rejected'), (state, action) => {
             state.loading = false
-            state.error = action.error.message
+
+            const status = action.error.message
+            if (status.includes('500')) {
+                state.error = 'Internal server error'
+                return
+            }
+
+            if (action.type.includes('login')) {
+                if (status.includes('401')) {
+                    state.error = 'Invalid phone number or password'
+                    return
+                } else if (status.includes('400')) {
+                    state.error = 'Invalid login data'
+                    return
+                }
+
+                state.error = action.error?.message || 'Login failed'
+            } else if (action.type.includes('register')) {
+                if (status.includes('400')) {
+                    state.error = 'Invalid register data'
+                    return
+                } else if (status.includes('409')) {
+                    state.error = 'Phone number already registered'
+                    return
+                }
+                
+                state.error = action.error?.message || 'Register failed'
+            } else if (action.type.includes('fetchUser') && status.includes('401')) { 
+                state.isDataLoaded = true
+                state.isLoggedIn = false
+            } else {
+                state.error = action.error?.message || 'Request failed'
+            }
         })
     }
 });
