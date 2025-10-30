@@ -138,6 +138,7 @@ export const userSlice = createSlice({
                 
                 state.error = action.error?.message || 'Register failed'
             } else if (action.type.includes('fetchUser') && status.includes('401')) { 
+                state.isDataLoaded = true
                 state.isLoggedIn = false
             } else {
                 state.error = action.error?.message || 'Request failed'
