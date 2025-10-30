@@ -12,26 +12,26 @@ import {
 
 const TIME = 15;
 const TEAMS = [
-  { name: "Liverpool", pts: 0, p: 0, w: 0, d: 0, l: 0 ,shortname:"LIV"},
-  { name: "Man City", pts: 0, p: 0, w: 0, d: 0, l: 0 ,shortname:"MCI" },
-  { name: "Arsenal", pts: 0, p: 0, w: 0, d: 0, l: 0   ,shortname:"ARS" },
-  { name: "Chelsea", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"CHE" },
-  { name: "Tottenham", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"TOT" },
-  { name: "Man United", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"MUN" },
-  { name: "Newcastle", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"NEW" },
-  { name: "Aston Villa", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"AVL" },
-  { name: "Brighton", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"BHA" },
-  { name: "West Ham", pts: 0, p: 0, w: 0, d: 0, l: 0    ,shortname:"WHU" },
-  { name: "Fulham", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"FUL" },
-  { name: "Brentford", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"BRE" },
-  { name: "Crystal Palace", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"CRY" },
-  { name: "Wolves", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"WOL" },
-  { name: "Everton", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"EVE" },
-  { name: "Forest", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"FOR" },
-  { name: "Leicester", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"LEI" },
-  { name: "Leeds", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"LEE" },
-  { name: "Bournemouth", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"BOU" },
-  { name: "Burnley", pts: 0, p: 0, w: 0, d: 0, l: 0  ,shortname:"BUR" },
+  { name: "Liverpool", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "LIV" },
+  { name: "Man City", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "MCI" },
+  { name: "Arsenal", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "ARS" },
+  { name: "Chelsea", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "CHE" },
+  { name: "Tottenham", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "TOT" },
+  { name: "Man United", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "MUN" },
+  { name: "Newcastle", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "NEW" },
+  { name: "Aston Villa", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "AVL" },
+  { name: "Brighton", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "BHA" },
+  { name: "West Ham", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "WHU" },
+  { name: "Fulham", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "FUL" },
+  { name: "Brentford", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "BRE" },
+  { name: "Crystal Palace", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "CRY" },
+  { name: "Wolves", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "WOL" },
+  { name: "Everton", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "EVE" },
+  { name: "Forest", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "FOR" },
+  { name: "Leicester", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "LEI" },
+  { name: "Leeds", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "LEE" },
+  { name: "Bournemouth", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "BOU" },
+  { name: "Burnley", pts: 0, p: 0, w: 0, d: 0, l: 0, shortname: "BUR" },
 ];
 
 //const MockUSER = { name: "Player1", luck: 55, bal: 5000, bets: [] };
@@ -66,15 +66,15 @@ function FootballLuckGameMiniStyled({ className }) {
     [opp]: Math.floor(Math.random() * 6) + 5,
   });
 
-useEffect(() => {
-    dispatch(fetchUser())
-  }, [dispatch])
+  useEffect(() => {
+    dispatch(fetchUser());
+  }, [dispatch]);
 
   useEffect(() => {
     if (!user.isLoggedIn && user.isDataLoaded) {
-      navigate('/')
+      navigate("/");
     }
-  }, [user.isLoggedIn, user.isDataLoaded, navigate])
+  }, [user.isLoggedIn, user.isDataLoaded, navigate]);
 
   const getRate = (teamPts, oppPts) => {
     // Base rate = 1.2 - 2.5
@@ -367,7 +367,7 @@ useEffect(() => {
       }, 2000);
     }, 100);
   };
-
+//🍀 Luck {user.lucknumber} 
   return (
     <div className={className}>
       <div className="header">
@@ -375,7 +375,8 @@ useEffect(() => {
           Apex <span>Ball</span>
         </h1>
         <div className="userInfo">
-          🍀 Luck {user.lucknumber} 💰 ฿{user.balance} {user.firstname}{" "}
+          
+          💰 ฿{user.balance} {user.firstname}{" "}
           {user.lastname}
         </div>
       </div>
@@ -427,23 +428,28 @@ useEffect(() => {
                 <div className={`matchCard ${fadeState}`} key={i}>
                   <div className="header">
                     <div className="teamColumn">
-                      <div className="shortname">        {
-          TEAMS.find(t => t.name === m.teamA)?.shortname || "?"
-        }</div>
+                      <div className="shortname">
+                        {" "}
+                        {TEAMS.find((t) => t.name === m.teamA)?.shortname ||
+                          "?"}
+                      </div>
                       <br />
                       <div className="teamName">{m.teamA}</div>
                     </div>
 
                     <div className="date">
-                       {m.date || new Date().toLocaleDateString("th-TH")}
-                      <br /><br />
+                      {m.date || new Date().toLocaleDateString("th-TH")}
+                      <br />
+                      <br />
                       <strong>{timer}s</strong>
                     </div>
 
                     <div className="teamColumn">
-                      <div className="shortname">        {
-          TEAMS.find(t => t.name === m.teamB)?.shortname || "?"
-        }</div>
+                      <div className="shortname">
+                        {" "}
+                        {TEAMS.find((t) => t.name === m.teamB)?.shortname ||
+                          "?"}
+                      </div>
                       <br />
                       <div className="teamName">{m.teamB}</div>
                     </div>
@@ -573,7 +579,21 @@ useEffect(() => {
                 type="number"
                 placeholder="จำนวนเดิมพัน"
                 value={tempAmount}
-                onChange={(e) => setTempAmount(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  // ตรวจว่าเป็นเลขจำนวนเต็มบวกเท่านั้น
+                  if (/^\d*$/.test(value)) {
+                    // ถ้าเป็นตัวเลขถูกต้องให้บันทึกค่าได้
+                    setTempAmount(value);
+                  } else {
+                    // ถ้าไม่ใช่ (ติดลบ, ตัวอักษร, ทศนิยม)
+                    alert(
+                      "กรุณากรอกจำนวนเดิมพันเป็นตัวเลขจำนวนเต็มบวกเท่านั้น!"
+                    );
+                    setTempAmount(""); // รีเซ็ตค่ากลับเป็นว่าง
+                  }
+                }}
               />
               <div className="btns">
                 <button
@@ -622,26 +642,32 @@ export default styled(FootballLuckGameMiniStyled)`
     background: #111;
     padding: 15px 30px;
     border-bottom: 2px solid #00eaff;
+    
   }
   .header h1 {
     font-size: 24px;
+        text-shadow: 0 0 6px #f0f0f0ff, 0 0 6px #00bfff; /* เงาสีฟ้า */
+        
   }
   .header h1 span {
     color: #00eaff;
   }
-  .userInfo {
-    color: #ccc;
-    font-size: 14px;
-  }
+.userInfo {
+  color: #ffffffff; /* สีขาว */
+  font-size: 14px;
+  text-shadow: 0 0 6px #00bfff, 0 0 12px #00bfff; /* เงาสีฟ้า */
+}
 
   .main {
     display: grid;
     grid-template-columns: 22% 56% 22%;
     flex-grow: 1;
+    box-shadow: 0 6px 12px -2px #00bfff;
   }
   .sidebar-left {
     background: #232323;
     padding: 10px;
+    box-shadow: 0 0 4px #00bfff;
   }
   .sidebar-left h2 {
     background: #00eaff;
@@ -649,6 +675,8 @@ export default styled(FootballLuckGameMiniStyled)`
     text-align: center;
     border-radius: 6px;
     margin-bottom: 10px;
+    box-shadow: 0 0 4px #00bfff;
+    
   }
   .sidebar-left table {
     width: 100%;
@@ -656,6 +684,7 @@ export default styled(FootballLuckGameMiniStyled)`
     border-collapse: collapse;
     color: #ddd;
     background: #111;
+    box-shadow: 0 0 4px #00bfff;
   }
   .sidebar-left th,
   td {
@@ -667,14 +696,15 @@ export default styled(FootballLuckGameMiniStyled)`
     color: #00eaff;
     border-bottom: 1px solid #00eaff;
   }
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  gap: 15px;
+  border: 1px solid #00eaff;
+}
 
-  .center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 15px;
-    gap: 15px;
-  }
   .banner {
     background: #00eaff;
     color: #000;
@@ -686,6 +716,8 @@ export default styled(FootballLuckGameMiniStyled)`
     justify-content: center;
     align-items: center;
     font-weight: bold;
+    text-shadow: 0 0 15px #ffffffff, 0 0 15px #cbf2ffff; /* เงาสีฟ้า */
+    box-shadow: 0 0 7px #00bfff;
   }
   .matches {
     display: flex;
@@ -699,6 +731,7 @@ export default styled(FootballLuckGameMiniStyled)`
     width: 390px;
     text-align: center;
     padding: 30px;
+    box-shadow: 0 0 7px #00bfff;
   }
   .matchCard .betInfo {
     background: #00eaff22;
@@ -727,22 +760,21 @@ export default styled(FootballLuckGameMiniStyled)`
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 0 7px #00eaff;
   }
-.matchCard .date {
-  font-size: 14px;
-  color: #aaa;
-  
-  
-}
+  .matchCard .date {
+    font-size: 14px;
+    color: #aaa;
+  }
 
-.matchCard .date strong {
-border: 1px solid #00fbff;
-padding: 4px 8px;
-border-radius: 6px;
+  .matchCard .date strong {
+    border: 1px solid #00fbff;
+    padding: 4px 8px;
+    border-radius: 6px;
 
-  font-size: 16px;
-  color: #00fbff;
-}
+    font-size: 16px;
+    color: #00fbff;
+  }
   .matchCard .teams {
     display: flex;
     justify-content: space-between;
@@ -778,6 +810,8 @@ border-radius: 6px;
     padding: 5px 15px;
     cursor: pointer;
     transition: 0.2s;
+    box-shadow: 0 0 7px #00eaff;
+    
   }
   .matchCard button:hover {
     background: #00ffff;
@@ -794,6 +828,8 @@ border-radius: 6px;
     color: #00eaff;
     border-bottom: 1px solid #00eaff;
     padding: 10px;
+    background: #111;
+    box-shadow: 0 0 4px #00bfff;
   }
   .resultBox {
     background: #1c1c1c;
@@ -802,6 +838,7 @@ border-radius: 6px;
     font-size: 14px;
     height: 200px;
     overflow-y: auto;
+    box-shadow: 0 0 4px #00bfff;
   }
 
   .modalWrapper {
@@ -855,6 +892,7 @@ border-radius: 6px;
     padding: 6px 0;
     cursor: pointer;
     transition: 0.2s;
+    box-shadow: 0 0 5px #00eaff;
   }
   .btns button.cancel {
     background: #444;

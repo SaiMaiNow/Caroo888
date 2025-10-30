@@ -16,7 +16,6 @@ function App() {
       {/* <Navbar /> */}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/Test" element={<Test />} />
         <Route path="/Ballgame" element={<Ballgame />} />
         <Route path="/test" element={<Test />} />
         <Route path="/auth/:type" element={<Auth />} />
