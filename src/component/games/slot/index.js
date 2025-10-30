@@ -1,4 +1,8 @@
+import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addBalance, subtractBalance } from '../../../features/user/userSlice';
+
 import styled from 'styled-components';
 import bg from './assets/bg.jpg';
 import { GameCanvas } from './features/GameCanvas';
@@ -15,90 +19,96 @@ import {
 
 // --- 3. Main Game Component (คอมโพเนนต์หลัก) ---
 function App({ className }) {
-  // --- State (สถานะของเกม) ---
-  const [grid, setGrid] = useState([]); 
-  const [balance, setBalance] = useState(1000); 
-  const [currentBetIndex, setCurrentBetIndex] = useState(DEFAULT_BET_INDEX);
-  const [message, setMessage] = useState("กด 'หมุน!' เพื่อเริ่ม"); 
+
+  const navigate = useNavigate();
   
-  const [spinning, setSpinning] = useState(false); 
-  const [isTurbo, setIsTurbo] = useState(false); 
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  const [grid, setGrid] = useState([]);
+  const [currentBetIndex, setCurrentBetIndex] = useState(DEFAULT_BET_INDEX);
+  const [message, setMessage] = useState("กด 'หมุน!' เพื่อเริ่ม");
+  const [spinning, setSpinning] = useState(false);
+  const [isTurbo, setIsTurbo] = useState(false);
 
   // Win Animation State
-  const [spinWin, setSpinWin] = useState(0); 
-  const [spinMultiplier, setSpinMultiplier] = useState(0); 
+  const [spinWin, setSpinWin] = useState(0);
+  const [spinMultiplier, setSpinMultiplier] = useState(0);
 
-  // Luck State
-  const [luck, setLuck] = useState(0); 
+  // check Login
+  useEffect(() => {
+    if (!user.isLoggedIn) {
+      navigate('/');
+    }
+  }, [user.isLoggedIn, navigate]);
 
   // Highlight State
-  const [winningCells, setWinningCells] = useState(new Set()); 
+  const [winningCells, setWinningCells] = useState(new Set());
   const lastPulseTimeRef = useRef(0);
   const pulseStateRef = useRef(false);
 
   // Free Spin State
-  const [isFreeSpins, setIsFreeSpins] = useState(false); 
-  const [freeSpinsLeft, setFreeSpinsLeft] = useState(0); 
-  const [isAutoSpinningFreeSpins, setIsAutoSpinningFreeSpins] = useState(false); 
-  const [freeSpinTotalWin, setFreeSpinTotalWin] = useState(0); 
-  const [freeSpinTotalMultiplier, setFreeSpinTotalMultiplier] = useState(0); 
-  const [showFreeSpinSummary, setShowFreeSpinSummary] = useState(false); 
+  const [isFreeSpins, setIsFreeSpins] = useState(false);
+  const [freeSpinsLeft, setFreeSpinsLeft] = useState(0);
+  const [isAutoSpinningFreeSpins, setIsAutoSpinningFreeSpins] = useState(false);
+  const [freeSpinTotalWin, setFreeSpinTotalWin] = useState(0);
+  const [freeSpinTotalMultiplier, setFreeSpinTotalMultiplier] = useState(0);
+  const [showFreeSpinSummary, setShowFreeSpinSummary] = useState(false);
 
   // --- Refs ---
-  const currentBet = BET_AMOUNTS[currentBetIndex]; 
+  const currentBet = BET_AMOUNTS[currentBetIndex];
   const spinLogicRef = useRef();
 
   // --- 3.1. Win Animation (อนิเมชันโชว์เงินไหล) ---
   const runWinAnimation = useCallback(async (baseWin, totalMultiplier) => {
     setMessage("ชนะ!");
-    setSpinWin(0); 
+    setSpinWin(0);
     setSpinMultiplier(0);
-    
+
     await tickNumber(0, baseWin, 1000, setSpinWin);
     await delay(200);
 
     if (totalMultiplier > 0) {
       setSpinMultiplier(totalMultiplier);
       await delay(500);
-      
+
       const finalWin = baseWin * totalMultiplier;
       await tickNumber(baseWin, finalWin, 1000, setSpinWin);
       await delay(200);
-      return finalWin; 
+      return finalWin;
     }
 
-    return baseWin; 
-  }, []); 
+    return baseWin;
+  }, []);
 
   // --- 3.2. Main Spin Logic (ตรรกะการหมุนหลัก) ---
   spinLogicRef.current = async () => {
     setSpinning(true);
-    setWinningCells(new Set()); 
-    
+    setWinningCells(new Set());
+
     const isThisAFreeSpin = isFreeSpins;
     const spinDuration = (isThisAFreeSpin ? false : isTurbo) ? SPIN_DURATION_TURBO : SPIN_DURATION_NORMAL;
-    
+
     if (isThisAFreeSpin) {
-      setMessage(`ฟรีสปิน! (รอบที่ ${freeSpinsLeft})`); 
+      setMessage(`ฟรีสปิน! (รอบที่ ${freeSpinsLeft})`);
     } else {
-      if (balance < currentBet) {
+      if (user.balance < currentBet) {
         setMessage("เงินไม่พอ!");
         setSpinning(false);
         return;
       }
-      setBalance(prev => prev - currentBet);
+      dispatch(subtractBalance(currentBet));
       setMessage("...หมุน...");
     }
 
     setSpinWin(0);
     setSpinMultiplier(0);
-    lastPulseTimeRef.current = 0; 
+    lastPulseTimeRef.current = 0;
 
-    let currentGrid; 
+    let currentGrid;
 
     const startTime = Date.now();
     while (Date.now() - startTime < spinDuration) {
-      currentGrid = createRandomGrid(); 
+      currentGrid = createRandomGrid();
       setGrid(currentGrid);
       await delay(50);
     }
@@ -107,122 +117,122 @@ function App({ className }) {
       const scatterCount = currentGrid.flat().filter(cell => cell && cell.symbol === SCATTER_SYMBOL).length;
       if (scatterCount >= FREE_SPINS_TRIGGER_COUNT) {
         const spinsAwarded = BASE_FREE_SPINS_AWARDED + ((scatterCount - FREE_SPINS_TRIGGER_COUNT) * EXTRA_SPINS_PER_SCATTER);
-        
+
         setIsFreeSpins(true);
         setFreeSpinsLeft(spinsAwarded);
-        setFreeSpinTotalMultiplier(0); 
+        setFreeSpinTotalMultiplier(0);
         setFreeSpinTotalWin(0);
-        setGrid(currentGrid); 
+        setGrid(currentGrid);
         setMessage(`เข้าสู่โหมดฟรีสปิน! ${spinsAwarded} ครั้ง`);
-        
-        setIsAutoSpinningFreeSpins(true); 
-        setIsTurbo(false); 
-        
+
+        setIsAutoSpinningFreeSpins(true);
+        setIsTurbo(false);
+
         setSpinning(false);
-        return; 
+        return;
       }
     }
-    
+
     let clusters = findClusters(currentGrid);
     let didWin = clusters.length > 0;
-    
-    if (!didWin && !isThisAFreeSpin && luck > 0) {
-      const pityChance = luck / 400; 
+
+    if (!didWin && !isThisAFreeSpin && user.lucknumber > 0) {
+      const pityChance = user.lucknumber / 400;
       if (Math.random() < pityChance) {
         currentGrid[0][0] = { symbol: SYMBOLS.S1, multiplier: 1 };
         currentGrid[0][1] = { symbol: SYMBOLS.S1, multiplier: 1 };
         currentGrid[0][2] = { symbol: SYMBOLS.S1, multiplier: 1 };
         currentGrid[1][1] = { symbol: SYMBOLS.S1, multiplier: 1 };
         currentGrid[1][2] = { symbol: SYMBOLS.S1, multiplier: 1 };
-        setGrid([...currentGrid]); 
-        clusters = findClusters(currentGrid); 
+        setGrid([...currentGrid]);
+        clusters = findClusters(currentGrid);
         didWin = true;
         setMessage("โชคช่วย!");
       }
     }
-    
+
     if (didWin) {
       let baseWin = 0;
       let currentSpinMultiplier = 0;
       const newWinningCells = new Set();
-      
+
       clusters.forEach(cluster => {
-        const symbol = cluster[0].cell.symbol; 
-        const size = cluster.length; 
-        
+        const symbol = cluster[0].cell.symbol;
+        const size = cluster.length;
+
         let payoutSize = Math.min(size, 36);
         let payout = 0;
         while (payoutSize >= MIN_CLUSTER_SIZE && payout === 0) {
           payout = PAYTABLE[`${symbol}_${payoutSize}`] || 0;
-          payoutSize--; 
+          payoutSize--;
         }
-        
+
         const calculatedPayout = payout * (currentBet / 10);
         baseWin += calculatedPayout;
-        
+
         cluster.forEach(c => {
           newWinningCells.add(`${c.r},${c.c}`);
           if (c.cell.multiplier > 1) {
-            currentSpinMultiplier += c.cell.multiplier; 
+            currentSpinMultiplier += c.cell.multiplier;
           }
         });
       });
-      
+
       if (isThisAFreeSpin) {
-        await runWinAnimation(baseWin, 0); 
-        setFreeSpinTotalWin(prev => prev + baseWin); 
-        setFreeSpinTotalMultiplier(prev => prev + currentSpinMultiplier); 
-        setLuck(prev => Math.max(prev - 15, 0)); 
+        await runWinAnimation(baseWin, 0);
+        setFreeSpinTotalWin(prev => prev + baseWin);
+        setFreeSpinTotalMultiplier(prev => prev + currentSpinMultiplier);
+        subtractLuck(15); // ใช้ฟังก์ชันที่สร้างขึ้น
       } else {
         const finalWin = await runWinAnimation(baseWin, currentSpinMultiplier);
-        setBalance(prev => prev + finalWin);
+        dispatch(addBalance(finalWin));
         setMessage(`คุณชนะ ${finalWin.toLocaleString()}!`);
-        setLuck(prev => Math.max(prev - 10, 0)); 
+        subtractLuck(10); // ใช้ฟังก์ชันที่สร้างขึ้น
       }
-      
-      setWinningCells(newWinningCells); 
+
+      setWinningCells(newWinningCells);
 
     } else {
       setMessage(isThisAFreeSpin ? "โอ๊ะ..." : "เสียใจด้วยนะ");
       if (isThisAFreeSpin) {
-        setLuck(prev => Math.min(prev + 10, 100)); 
+        addLuck(10); // ใช้ฟังก์ชันที่สร้างขึ้น
       } else {
-        setLuck(prev => Math.min(prev + 2, 100)); 
+        addLuck(2); // ใช้ฟังก์ชันที่สร้างขึ้น
       }
     }
 
     setSpinning(false);
   };
-  
+
   // --- 3.3. Game Loop (สำหรับ Auto Free Spins) ---
   useEffect(() => {
-    if (!isAutoSpinningFreeSpins) return; 
-    
+    if (!isAutoSpinningFreeSpins) return;
+
     if (freeSpinsLeft > 0) {
       const autoSpin = async () => {
-        await spinLogicRef.current(); 
-        await delay(4000); 
-        setFreeSpinsLeft(prev => prev - 1); 
+        await spinLogicRef.current();
+        await delay(4000);
+        setFreeSpinsLeft(prev => prev - 1);
       };
       autoSpin();
     } else {
       const showSummary = async () => {
         setIsAutoSpinningFreeSpins(false);
         setMessage(`ฟรีสปินสิ้นสุด! กำลังรวมยอด...`);
-        await delay(2000); 
-        setShowFreeSpinSummary(true); 
+        await delay(2000);
+        setShowFreeSpinSummary(true);
       };
-      
-      if(isAutoSpinningFreeSpins) { 
-         showSummary();
+
+      if (isAutoSpinningFreeSpins) {
+        showSummary();
       }
     }
   }, [isAutoSpinningFreeSpins, freeSpinsLeft]);
-  
+
   // --- 3.4. Event Handlers (จัดการปุ่ม) ---
   const handleSpin = async () => {
-    if (spinning || isAutoSpinningFreeSpins) return; 
-    await spinLogicRef.current(); 
+    if (spinning || isAutoSpinningFreeSpins) return;
+    await spinLogicRef.current();
   };
 
   const handleChangeBet = (direction) => {
@@ -234,16 +244,31 @@ function App({ className }) {
   };
 
   const handleToggleTurbo = () => {
-    if (isFreeSpins) return; 
+    if (isFreeSpins) return;
     setIsTurbo(prev => !prev);
   };
-  
+
   const handleCloseSummary = () => {
     const finalAmount = freeSpinTotalWin * (freeSpinTotalMultiplier > 0 ? freeSpinTotalMultiplier : 1);
-    setBalance(prev => prev + finalAmount);
+    dispatch(addBalance(finalAmount));
     setShowFreeSpinSummary(false);
     setIsFreeSpins(false);
     setMessage("กด 'หมุน!' เพื่อเริ่ม");
+  };
+
+  // เพิ่มฟังก์ชันจัดการ luck ไว้ด้านบนของคอมโพเนนต์
+  const addLuck = (amount) => {
+    dispatch({
+      type: 'user/setLucknumber',
+      payload: Math.min(user.lucknumber + amount, 100)
+    });
+  };
+
+  const subtractLuck = (amount) => {
+    dispatch({
+      type: 'user/setLucknumber',
+      payload: Math.max(user.lucknumber - amount, 0)
+    });
   };
 
   // --- 3.5. Render (วาดหน้าจอ UI) ---
@@ -279,8 +304,8 @@ function App({ className }) {
         isTurbo={isTurbo}
         currentBet={currentBet}
         freeSpinsLeft={freeSpinsLeft}
-        luck={luck}
-        balance={balance}
+        luck={user.lucknumber}
+        balance={user.balance}
         onChangeBet={handleChangeBet}
         onSpin={handleSpin}
         onToggleTurbo={handleToggleTurbo}

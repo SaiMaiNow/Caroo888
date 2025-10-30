@@ -60,9 +60,9 @@ export function ControlPanel({
         </div>
         <div className="css-small-stat-row">
           <span className="css-small-stat-label">Balance:</span>
-          <span className="css-small-stat-balance">{balance.toLocaleString()}</span>
+          <span className="css-small-stat-balance">{balance}</span>
         </div>
       </div>
-    </div>
+    </div>  
   );
 }

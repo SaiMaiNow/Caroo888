@@ -3,7 +3,8 @@ import GlobalStyle from './GlobalStyle';
 
 import Home from "./component/Home"
 import Navbar from './component/Navbar';
-import Test from "./component/Test"
+import Test from "./component/Test";
+import Slot from './component/games/Slot';
 
 function App() {
   return (
@@ -13,8 +14,11 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/Test" element={<Test />} />
+        <Route path="/games/Slot" element={<Slot />} />
       </Routes>
     </>
+    
+      
   );
 }
 
