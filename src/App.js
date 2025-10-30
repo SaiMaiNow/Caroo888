@@ -7,6 +7,7 @@ import Test from "./component/Test"
 import Ballgame from './component/games/Ballgame';  
 
 import Auth from "./component/Auth"
+import NotFound from "./component/NotFound"
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/Ballgame" element={<Ballgame />} />
         <Route path="/test" element={<Test />} />
         <Route path="/auth/:type" element={<Auth />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );
