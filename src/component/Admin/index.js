@@ -1,10 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { fetchUser } from '../../features/user/userSlice'
+import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+
 
 function Admin({ className }) {
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const user = useSelector((state) => state.user)
 
   // Mock users
   const users = Array.from({ length: 35 }).map((_, i) => ({
@@ -18,6 +25,16 @@ function Admin({ className }) {
   const totalPages = Math.ceil(users.length / usersPerPage);
   const startIndex = (currentPage - 1) * usersPerPage;
   const currentUsers = users.slice(startIndex, startIndex + usersPerPage);
+
+  useEffect(() => {
+    dispatch(fetchUser())
+  }, [dispatch])
+
+  useEffect(() => {
+    if (!user.isLoggedIn && user.isDataLoaded) {
+      navigate('/')
+    }
+  }, [user.isLoggedIn, user.isDataLoaded, navigate])
 
   return (
     <div className={className}>
