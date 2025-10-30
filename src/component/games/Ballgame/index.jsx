@@ -72,6 +72,7 @@ function FootballLuckGameMiniStyled({ className }) {
 
   useEffect(() => {
     if (!user.isLoggedIn) {
+      
       //return navigate("/");
     }
   }, [user.isLoggedIn]);
