@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, use } from "react";
 import styled from "styled-components";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -68,12 +68,12 @@ function FootballLuckGameMiniStyled({ className }) {
 
   useEffect(() => {
     dispatch(fetchUser());
+    //return navigate("/");
   }, [dispatch]);
 
   useEffect(() => {
     if (!user.isLoggedIn) {
-      
-      //return navigate("/");
+     // return navigate("/");
     }
   }, [user.isLoggedIn]);
 
@@ -204,13 +204,12 @@ function FootballLuckGameMiniStyled({ className }) {
     // เริ่ม fade out
     setFadeState("fade-out");
 
-
     //เก็บสำเนา (snapshot) ของ state ปัจจุบัน (user และ userBets) เพื่อป้องกันปัญหา stale state ภายใน setTimeout
     const userSnapshot = { ...user };
     const betsSnapshot = [...userBets];
     //user อาจถูกอัปเดตจาก server แล้ว balance เปลี่ยน
     //userBets อาจถูกล้างก่อนจบรอบ→ ผลเกมรอบนี้จะผิดเพี้ยน ❌
-  
+
     setTimeout(() => {
       const now = new Date();
       const dateStr = `${now.getDate()}/${now.getMonth() + 1}`;
@@ -224,8 +223,8 @@ function FootballLuckGameMiniStyled({ className }) {
         const betForThisMatch = betsSnapshot.find(
           (b) => b.teamA === m.teamA && b.teamB === m.teamB
         );
-      
-        console.log( userSnapshot.lucknumber);
+
+        console.log(userSnapshot.lucknumber);
         console.log(user.lucknumber);
 
         let scoreTeamA, scoreTeamB;
@@ -413,7 +412,6 @@ function FootballLuckGameMiniStyled({ className }) {
                   </tr>
                 ))}
             </tbody>
-            
           </table>
           <br />
         </div>
@@ -438,7 +436,7 @@ function FootballLuckGameMiniStyled({ className }) {
                     <div className="date">
                       28/10
                       <br />
-                      <small>{timer}s</small>
+                      <strong>{timer}s</strong>
                     </div>
 
                     <div className="teamColumn">
@@ -654,7 +652,7 @@ export default styled(FootballLuckGameMiniStyled)`
     font-size: 12px;
     border-collapse: collapse;
     color: #ddd;
-
+    background: #111;
   }
   .sidebar-left th,
   td {
@@ -726,10 +724,15 @@ export default styled(FootballLuckGameMiniStyled)`
     align-items: center;
     justify-content: center;
   }
-  .matchCard .date {
-    font-size: 12px;
-    color: #aaa;
-  }
+.matchCard .date {
+  font-size: 14px;
+  color: #aaa;
+  padding-bottom: 10px;
+}
+
+.matchCard .date strong {
+  color: #00fbff;
+}
   .matchCard .teams {
     display: flex;
     justify-content: space-between;
