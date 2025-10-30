@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom';
-import { addBalance, subtractBalance } from '../../../features/user/userSlice';
+import { addBalance, fetchUser, subtractBalance } from '../../../features/user/userSlice';
 
 function Baccarat({ className }) {
   const [balance, setBalance] = useState(5000);
@@ -97,8 +97,12 @@ function Baccarat({ className }) {
   }, [isBetting]);
 
   useEffect(() => {
+    dispatch(fetchUser());
+  }, [dispatch]);
+
+  useEffect(() => {
     if (!user.isLoggedIn) {
-      // return navigate('/');
+      return navigate('/');
     }
   }, [user.isLoggedIn]);
 
