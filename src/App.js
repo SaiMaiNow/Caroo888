@@ -4,15 +4,17 @@ import GlobalStyle from './GlobalStyle';
 import Home from "./component/Home"
 import Navbar from './component/Navbar';
 import Test from "./component/Test"
+import Auth from "./component/Auth"
 
 function App() {
   return (
     <>
       <GlobalStyle />
-      <Navbar />
+      {/* <Navbar /> */}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/Test" element={<Test />} />
+        <Route path="/test" element={<Test />} />
+        <Route path="/auth/:type" element={<Auth />} />
       </Routes>
     </>
   );
