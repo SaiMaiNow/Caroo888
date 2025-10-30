@@ -564,7 +564,7 @@ const genMatches = () => {
 }
 
 export default styled(FootballLuckGameMiniStyled)`
-  font-family: "Tahoma", sans-serif;
+  font-family: "Keania", serif;
   background: #111;
   color: #fff;
   min-height: 100vh;
@@ -702,8 +702,6 @@ export default styled(FootballLuckGameMiniStyled)`
     background: #111;
   }
   .matchCard .rates span {
-    border: 1px solid #00eaff;
-    border-radius: 5%;
     padding: 10px 50px;
     width: 40px;
     height: 40px;
