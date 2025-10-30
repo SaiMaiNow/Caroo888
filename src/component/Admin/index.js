@@ -14,17 +14,17 @@ function Admin({ className }) {
   const user = useSelector((state) => state.user)
 
   // Mock users
-  const users = Array.from({ length: 35 }).map((_, i) => ({
-    id: i + 1,
-    name: `player_${(i + 1).toString().padStart(3, "0")}`,
-    balance: 100,
-    rate: ["60%", "70%", "80%", "90%", "100%"][Math.floor(Math.random() * 5)],
-  }));
+  const users = [
 
-  // Pagination
-  const totalPages = Math.ceil(users.length / usersPerPage);
-  const startIndex = (currentPage - 1) * usersPerPage;
-  const currentUsers = users.slice(startIndex, startIndex + usersPerPage);
+  ];
+
+  // if(user.role !== "admin"){
+  //   navigate('/')
+  // }
+
+  console.log(user)
+  console.log(user.role)
+  
 
   useEffect(() => {
     dispatch(fetchUser())
@@ -35,6 +35,20 @@ function Admin({ className }) {
       navigate('/')
     }
   }, [user.isLoggedIn, user.isDataLoaded, navigate])
+
+  useEffect(() => {
+    if (user.role !== "admin" && user.isDataLoaded) {
+      navigate('/')
+    }
+  }, [user.role, user.isDataLoaded, navigate])
+
+  useEffect(() => {
+    if (user && user.isDataLoaded) {
+      users.push(user)
+      console.log(users)
+    }
+  }, [user, user.isDataLoaded])
+
 
   return (
     <div className={className}>
@@ -51,16 +65,16 @@ function Admin({ className }) {
           </tr>
         </thead>
         <tbody>
-          {currentUsers.map((user) => (
-            <tr key={user.id}>
-              <td>{user.id}</td>
-              <td>{user.name}</td>
-              <td>{user.balance.toLocaleString()}</td>
-              <td>{user.rate}</td>
+          {users.forEach((value) => (
+            <tr key={value.id}>
+              <td>{value.id}</td>
+              <td>{value.name}</td>
+              <td>{value.balance.toLocaleString()}</td>
+              <td>{value.rate}</td>
               <td>
 
                 <Link
-                  to={`/admin/user/${user.id}`}
+                  to={`/admin/user/${value.id}`}
                   state={{ user }}
                   className="manage-btn"
                 >
@@ -73,7 +87,7 @@ function Admin({ className }) {
       </table>
 
       {/* Pagination */}
-      <div className="pagination">
+      {/* <div className="pagination">
         <button
           disabled={currentPage === 1}
           onClick={() => setCurrentPage((p) => p - 1)}
@@ -91,7 +105,7 @@ function Admin({ className }) {
         >
           ถัดไป ▶
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }
