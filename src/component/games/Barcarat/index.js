@@ -96,15 +96,15 @@ function Baccarat({ className }) {
     return () => clearInterval(timerRef.current);
   }, [isBetting]);
 
-  useEffect(() => {
-    dispatch(fetchUser());
-  }, [dispatch]);
+useEffect(() => {
+    dispatch(fetchUser())
+  }, [dispatch])
 
   useEffect(() => {
-    if (!user.isLoggedIn) {
-      return navigate('/');
+    if (!user.isLoggedIn && user.isDataLoaded) {
+      navigate('/')
     }
-  }, [user.isLoggedIn]);
+  }, [user.isLoggedIn, user.isDataLoaded, navigate])
 
   const dealBaccarat = () => {
     const suits = ["C", "D", "H", "S"];
