@@ -5,22 +5,13 @@ import { fetchUser } from '../../features/user/userSlice'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 
-
 function Admin({ className }) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 10;
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const user = useSelector((state) => state.user)
 
-  // Mock users
-  const users = [
 
-  ];
-
-  // if(user.role !== "admin"){
-  //   navigate('/')
-  // }
+  const [users, setUsers] = useState([]);
 
   console.log(user)
   console.log(user.role)
@@ -44,7 +35,7 @@ function Admin({ className }) {
 
   useEffect(() => {
     if (user && user.isDataLoaded) {
-      users.push(user)
+      setUsers([user])
       console.log(users)
     }
   }, [user, user.isDataLoaded])
@@ -65,14 +56,14 @@ function Admin({ className }) {
           </tr>
         </thead>
         <tbody>
-          {users.forEach((value) => (
+          {users.map((value) => (
             <tr key={value.id}>
               <td>{value.id}</td>
-              <td>{value.name}</td>
-              <td>{value.balance.toLocaleString()}</td>
-              <td>{value.rate}</td>
-              <td>
+              <td>{value.firstname} {value.lastname}</td>
+              <td>{value.balance}</td>
+              <td>{value.lucknumber}</td>
 
+              <td>
                 <Link
                   to={`/admin/user/${value.id}`}
                   state={{ user }}
@@ -85,27 +76,6 @@ function Admin({ className }) {
           ))}
         </tbody>
       </table>
-
-      {/* Pagination */}
-      {/* <div className="pagination">
-        <button
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage((p) => p - 1)}
-        >
-          ◀ ก่อนหน้า
-        </button>
-
-        <span>
-          หน้า {currentPage} / {totalPages}
-        </span>
-
-        <button
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage((p) => p + 1)}
-        >
-          ถัดไป ▶
-        </button>
-      </div> */}
     </div>
   );
 }

@@ -1,47 +1,28 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useLocation, Link, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { addBalance, subtractBalance } from "../../features/user/userSlice";
 
 function UserDetailPage({ className }) {
-  const { state } = useLocation();
-  const { id } = useParams();
-  const [user, setUser] = useState(state?.user || null);
+
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user); 
   const [amount, setAmount] = useState("");
   const [showRateDropdown, setShowRateDropdown] = useState(false);
   const rateOptions = ["60%", "70%", "80%", "90%", "100%"];
 
-  if (!user)
-    return (
-      <div className={className}>
-        <Link to="/admin" className="back-btn">
-          ⬅ กลับไปหน้ารายชื่อ
-        </Link>
-        <p style={{ color: "#aaa" }}>❌ ไม่พบข้อมูลผู้ใช้ ID {id}</p>
-      </div>
-    );
-
   const handleAddMoney = () => {
     if (!amount) return alert("กรุณากรอกจำนวนเงิน");
-    setUser((prev) => ({
-      ...prev,
-      balance: prev.balance + Number(amount),
-    }));
+    dispatch(addBalance({ amount: Number(amount) })); 
     setAmount("");
   };
 
   const handleSubtractMoney = () => {
     if (!amount) return alert("กรุณากรอกจำนวนเงิน");
     if (user.balance < Number(amount)) return alert("❌ ยอดเงินไม่พอ");
-    setUser((prev) => ({
-      ...prev,
-      balance: prev.balance - Number(amount),
-    }));
+    dispatch(subtractBalance({ amount: Number(amount) })); 
     setAmount("");
-  };
-
-  const handleSelectRate = (rate) => {
-    setUser((prev) => ({ ...prev, rate }));
-    setShowRateDropdown(false);
   };
 
   return (
@@ -51,15 +32,17 @@ function UserDetailPage({ className }) {
       </Link>
 
       <div className="user-card">
-        <h1>ข้อมูลผู้เล่น: {user.name}</h1>
+        <h1>
+          ข้อมูลผู้เล่น: {user.firstname} {user.lastname}
+        </h1>
         <p>
-          <strong>ยอดเงิน:</strong> {user.balance.toLocaleString()} ฿
+          <strong>ยอดเงิน:</strong>{" "}
+          {user.balance ? user.balance : 0} ฿
         </p>
         <p>
-          <strong>เรทแตก:</strong> {user.rate}
+          <strong>เรทแตก:</strong> {user.lucknumber ?? "-"}
         </p>
 
-        {/* ✅ ส่วนควบคุมยอดเงิน */}
         <div className="money-control">
           <input
             type="number"
@@ -73,7 +56,6 @@ function UserDetailPage({ className }) {
           </div>
         </div>
 
-        {/* ✅ ส่วนปรับเรท */}
         <div className="rate-control">
           <button onClick={() => setShowRateDropdown(!showRateDropdown)}>
             ⚙️ ปรับเรท
@@ -81,9 +63,7 @@ function UserDetailPage({ className }) {
           {showRateDropdown && (
             <div className="rate-dropdown">
               {rateOptions.map((rate) => (
-                <button key={rate} onClick={() => handleSelectRate(rate)}>
-                  {rate}
-                </button>
+                <button key={rate}>{rate}</button>
               ))}
             </div>
           )}
@@ -125,7 +105,6 @@ export default styled(UserDetailPage)`
       margin-bottom: 0.5rem;
     }
 
-    /* ✅ กล่องควบคุมเงิน */
     .money-control {
       margin-top: 1.5rem;
 
