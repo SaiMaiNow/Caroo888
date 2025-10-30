@@ -43,6 +43,7 @@ function FootballLuckGameMiniStyled({ className }) {
   const [tempTeam, setTempTeam] = useState("");
   const [tempAmount, setTempAmount] = useState("");
   const [results, setResults] = useState([]);
+  const [fadeState, setFadeState] = useState("fade-in");
 
   const randomScore = () => Math.floor(Math.random() * 11);
   const checkLuck = (luck) => Math.floor(Math.random() * 100) + 1 <= luck;
@@ -51,7 +52,7 @@ function FootballLuckGameMiniStyled({ className }) {
     [opp]: Math.floor(Math.random() * 6) + 5,
   });
 
-  const rate = () => Number((1.4 + Math.random() * 0.6).toFixed(2));
+  const rate = () => Number((1.4 + Math.random() * 0.6).toFixed(2)); // 1.4 - 2.0
   const genMatches = () => {
     const shuffled = [...teams].sort(() => Math.random() - 0.5);
     const newMatches = [
@@ -68,6 +69,16 @@ function FootballLuckGameMiniStyled({ className }) {
     ];
     setMatches(newMatches);
   };
+
+  useEffect(() => {
+    if (timer <= 0) {
+      if (showModal) {
+        setShowModal(false);
+        alert("หมดเวลาวางเดิมพันแล้ว!");
+      }
+      endRound();
+    }
+  }, [timer]);
 
   useEffect(() => genMatches(), []);
   useEffect(() => {
@@ -121,92 +132,83 @@ function FootballLuckGameMiniStyled({ className }) {
   };
 
   const endRound = () => {
+    if (showModal) {
+      setShowModal(false);
+      alert("หมดเวลาวางเดิมพันแล้ว!");
+    }
     setIsBetting(false);
     clearInterval(timerRef.current);
-    const now = new Date();
-    const dateStr = `${now.getDate()}/${now.getMonth() + 1}`;
-    const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(
-      2,
-      "0"
-    )}`;
 
-    const matchResults = matches.map((m, i) => {
-      const bet = user.bets.find((b) => b.match === i);
-      let sA, sB;
-      if (bet) {
-        if (checkLuck(user.luck)) {
-          setUser((u) => ({ ...u, luck: u.luck - 5 }));
-          sA = randomScore();
-          sB = randomScore();
-        } else {
-          const forced = forceLose(
-            bet.team,
-            bet.team === m.teamA ? m.teamB : m.teamA
-          );
-          sA = forced[m.teamA];
-          sB = forced[m.teamB];
-        }
-      } else {
-        sA = randomScore();
-        sB = randomScore();
-      }
-      const win = sA > sB ? m.teamA : sB > sA ? m.teamB : "draw";
-      return { ...m, sA, sB, win, date: dateStr, time: timeStr };
-    });
-
-    setResultsLog((prev) => [...prev, ...matchResults]);
-
-    const newBetsLog = user.bets.map((b) => {
-      const r = matchResults[b.match];
-      const won = r.win === b.team;
-      return {
-        ...r,
-        teamBet: b.team,
-        betType: r.win === "draw" ? "เสมอ" : won ? "ชนะไป" : "แพ้",
-        amount: b.amt * (won ? b.rate : 1),
-        won,
-      };
-    });
-    setBetsLog((prev) => [...prev, ...newBetsLog]);
-
-    let updatedTeams = [...teams];
-    matchResults.forEach((r) => {
-      updatedTeams = updatedTeams.map((t) => {
-        if (t.name === r.teamA || t.name === r.teamB) {
-          let add = 0,
-            w = t.w,
-            d = t.d,
-            l = t.l;
-          if (r.win === "draw") {
-            add = 1;
-            d++;
-          } else if (r.win === t.name) {
-            add = 3;
-            w++;
-          } else {
-            l++;
-          }
-          return { ...t, pts: t.pts + add, p: t.p + 1, w, d, l };
-        }
-        return t;
-      });
-    });
-
-    let gain = 0;
-    user.bets.forEach((b) => {
-      const r = matchResults[b.match];
-      if (r.win === b.team) gain += Math.round(b.amt * b.rate);
-    });
-    setTeams(updatedTeams.sort((a, b) => b.pts - a.pts));
-    setUser((u) => ({ ...u, bal: u.bal + gain, bets: [] }));
-    setResults(matchResults);
+    // 👇 เริ่ม fade out ก่อนเปลี่ยนแมตช์
+    setFadeState("fade-out");
 
     setTimeout(() => {
-      setResults([]);
-      genMatches();
-      setTimer(TIME);
-      setIsBetting(true);
-    }, 2500);
+      const now = new Date();
+      const dateStr = `${now.getDate()}/${now.getMonth() + 1}`;
+      const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(
+        2,
+        "0"
+      )}`;
+
+      const matchResults = matches.map((m, i) => {
+        const bet = user.bets.find((b) => b.match === i);
+        let sA, sB;
+        if (bet) {
+          if (checkLuck(user.luck)) {
+            setUser((u) => ({ ...u, luck: u.luck - 5 }));
+            sA = randomScore();
+            sB = randomScore();
+          } else {
+            const forced = forceLose(
+              bet.team,
+              bet.team === m.teamA ? m.teamB : m.teamA
+            );
+            sA = forced[m.teamA];
+            sB = forced[m.teamB];
+          }
+        } else {
+          sA = randomScore();
+          sB = randomScore();
+        }
+        const win = sA > sB ? m.teamA : sB > sA ? m.teamB : "draw";
+        return { ...m, sA, sB, win, date: dateStr, time: timeStr };
+      });
+
+      setResultsLog((prev) => [...prev, ...matchResults]);
+      // เพิ่มหลัง setResultsLog(...)
+      setBetsLog((prev) =>
+        prev.map((b) => {
+          const r = matchResults[b.match];
+          const isWin = r.win === b.team;
+          return {
+            ...b,
+            sA: r.sA,
+            sB: r.sB,
+            won: isWin,
+            betType: isWin ? "ชนะ" : r.win === "draw" ? "เสมอ" : "แพ้",
+            endTime: `${r.time}`, // 🕒 เวลาจบแมตช์
+          };
+        })
+      );
+
+      let gain = 0;
+      user.bets.forEach((b) => {
+        const r = matchResults[b.match];
+        if (r.win === b.team) gain += Math.round(b.amt * b.rate);
+      });
+
+      setUser((u) => ({ ...u, bal: u.bal + gain, bets: [] }));
+      setResults(matchResults);
+
+      // ⏳ หลังแสดงผล 2.5 วิ → fade in รอบใหม่
+      setTimeout(() => {
+        setResults([]);
+        genMatches();
+        setTimer(TIME);
+        setIsBetting(true);
+        setFadeState("fade-in");
+      }, 2500);
+    }, 300); // fade out ใช้เวลา 0.3 วินาที
   };
 
   return (
@@ -259,7 +261,7 @@ function FootballLuckGameMiniStyled({ className }) {
             {matches.map((m, i) => {
               const betForMatch = user.bets.find((b) => b.match === i);
               return (
-                <div className="matchCard" key={i}>
+                <div className={`matchCard ${fadeState}`} key={i}>
                   <div className="header">
                     <div className="logo">Logo</div>
                     <div className="date">
@@ -329,18 +331,21 @@ function FootballLuckGameMiniStyled({ className }) {
           <div className="section">
             <h3>ผลการเดิมพัน</h3>
             <div className="resultBox">
-              {betsLog.length === 0 ? (
-                <p>ยังไม่มีการเดิมพัน</p>
-              ) : (
-                betsLog
-                  .filter((b) => b.won !== null)
-                  .reverse()
-                  .map((b, i) => (
-                    <p key={i}>
-                      {b.teamBet} {b.betType} | {b.amount}฿
-                    </p>
-                  ))
-              )}
+{betsLog.length === 0 ? (
+  <p>ยังไม่มีการเดิมพัน</p>
+) : (
+  betsLog
+    .filter((b) => b.won !== null)
+    .reverse()
+    .map((b, i) => (
+      <p key={i}>
+        ผลการเดิมพัน: {b.betType} เดิมพัน :({b.team})<br />
+        ผลการแข่งขัน: {b.teamA} {b.sA}-{b.sB} {b.teamB}<br />
+        เวลาจบแมตช์: {b.endTime}
+      </p>
+    ))
+)}
+
             </div>
           </div>
         </div>
@@ -666,5 +671,21 @@ export default styled(FootballLuckGameMiniStyled)`
     background: #111;
     color: #00eaff;
     padding: 4px 10px;
+  }
+  /* 🎞️ Fade animation */
+  .matchCard {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .matchCard.fade-out {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  .matchCard.fade-in {
+    opacity: 1;
+    transform: scale(1);
   }
 `;
