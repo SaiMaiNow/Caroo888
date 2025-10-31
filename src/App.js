@@ -1,9 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
 import GlobalStyle from './GlobalStyle';
 
-import Barcarat from "./component/Games/Barcarat"
+import Barcarat from "./component/games/Barcarat"
 import Home from "./component/Home"
-import Ballgame from './component/Games/Ballgame';  
+import Ballgame from './component/games/Ballgame';  
 
 import Admin from "./component/Admin"
 import UserDetailPage from './component/UserDetailPage';

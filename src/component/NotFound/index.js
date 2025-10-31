@@ -13,6 +13,10 @@ const NotFound = ({ className }) => {
   )
 }
 
+NotFound.propTypes = {
+  className: PropTypes.string.isRequired,
+}
+
 export default styled(NotFound)`
   display: flex;
   flex-direction: column;
