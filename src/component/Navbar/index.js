@@ -1,16 +1,58 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchUser } from '../../features/user/userSlice'
+import { fetchUser, logout } from '../../features/user/userSlice'
 
 function Navbar({ className }) {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.user)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const menuRef = useRef(null)
+  const menuButtonRef = useRef(null)
 
   useEffect(() => {
     dispatch(fetchUser())
   }, [dispatch])
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(event.target)
+      ) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isMenuOpen])
+
+  const handleOpenMenu = () => {
+    setIsMenuOpen(!isMenuOpen)
+  }
+
+  const handleDeposit = () => {
+    // navigate('/deposit')
+  }
+
+  const handleMyAccount = () => {
+    setIsMenuOpen(false)
+    // navigate('/my-account')
+  }
+
+  const handleLogout = () => {
+    setIsMenuOpen(false)
+    dispatch(logout())
+  }
 
   return (
     <header className={className}>
@@ -37,7 +79,7 @@ function Navbar({ className }) {
           <svg className="icon" xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24"><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 12v9.4a.6.6 0 0 1-.6.6H4.6a.6.6 0 0 1-.6-.6V12m17.4-5H2.6a.6.6 0 0 0-.6.6v3.8a.6.6 0 0 0 .6.6h18.8a.6.6 0 0 0 .6-.6V7.6a.6.6 0 0 0-.6-.6M12 22V7m0 0H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7m0 0h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7"></path></svg>
           โปรโมชั่น
         </Link>
-        <Link to="/contact">
+        <Link to="https://github.com/SaiMaiNow/Caroo888" target="_blank">
           <svg className="icon" xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24"><path fill="#ffb83f" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2m0 14H4V6h16zM4 0h16v2H4m0 20h16v2H4m8-12a2.5 2.5 0 0 0 0-5a2.5 2.5 0 0 0 0 5m0-3.5c.55 0 1 .45 1 1s-.45 1-1 1s-1-.45-1-1s.45-1 1-1m5 7.5c0-2.1-3.31-3-5-3s-5 .9-5 3v1h10zm-8.19-.5c.61-.5 2.03-1 3.19-1c1.17 0 2.59.5 3.2 1z"></path></svg>
           ติดต่อเรา
         </Link>
@@ -47,10 +89,10 @@ function Navbar({ className }) {
         {user && user?.isLoggedIn && user?.isDataLoaded ? (
           <div className="user-info">
             <p>{user.balance}THB</p>
-            <button>ฝาก</button>
-            <div>
+            <button onClick={handleDeposit}>ฝาก</button>
+            <button ref={menuButtonRef} onClick={handleOpenMenu}>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M4 22a8 8 0 1 1 16 0zm8-9c-3.315 0-6-2.685-6-6s2.685-6 6-6s6 2.685 6 6s-2.685 6-6 6" /></svg>
-            </div>
+            </button>
           </div>
         ) : (
           <>
@@ -63,11 +105,27 @@ function Navbar({ className }) {
           </>
         )}
       </div>
+
+      {isMenuOpen && (
+        <div ref={menuRef} className="menu-overlay">
+          <div className="menu-content">
+            <button onClick={handleMyAccount}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4a4 4 0 0 1 4 4a4 4 0 0 1-4 4a4 4 0 0 1-4-4a4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/></svg>
+              บัญชีของฉัน
+            </button>
+            <button onClick={handleLogout}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z"/></svg>
+              ออกจากระบบ
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
 
 export default styled(Navbar)`
+  position: relative;
   font-family: "Italiana", serif;
   height: 100px;
   width: 100%;
@@ -191,7 +249,7 @@ export default styled(Navbar)`
         border-radius: 0.5rem;
       }
 
-      div {
+      button:last-child {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -200,6 +258,55 @@ export default styled(Navbar)`
         font-size: 1rem;
         padding: 0.4rem 0.6rem;
         border-radius: 0.5rem;
+        background:transparent;
+      }
+    }
+  }
+
+  .menu-overlay {
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    top: 75px;
+    right: 50px;
+    padding: 0.5rem 0.7rem;
+    width: 150px;
+    background: #070A0B;
+    z-index: 100;
+    border-radius: 0.5rem 0 0.5rem 0.5rem;
+    border: 1px solid white;
+
+    .menu-content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      color: white;
+      font-size: 1rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      justify-content: center;
+      align-items: center;
+
+      button {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+        font-weight: 500;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #E89300;
       }
     }
   }
