@@ -13,6 +13,10 @@ const NotFound = ({ className }) => {
   )
 }
 
+NotFound.propTypes = {
+  className: PropTypes.string.isRequired,
+}
+
 export default styled(NotFound)`
   display: flex;
   flex-direction: column;
@@ -20,4 +24,10 @@ export default styled(NotFound)`
   justify-content: center;
   height: 100vh;
   width: 100vw;
+  color: white;
+
+  h1 {
+    font-size: 5rem;
+    color: #E89300;
+  }
 `
