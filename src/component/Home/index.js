@@ -34,10 +34,7 @@ function Home({ className, banners, secGames }) {
 
   const handleGameClick = (path) => {
     if (user.isLoggedIn && user.isDataLoaded) {
-      const gameWindow = window.open(path, '_blank', 'width=1500,height=800');
-      if (!gameWindow) {
-        window.open(path, '_blank');
-      }
+      navigate(path);
     } else {
       navigate('/auth/login');
     }
@@ -47,15 +44,6 @@ function Home({ className, banners, secGames }) {
     <div id="home" className={className}>
       <Navbar />
       <div className="home-container">
-        {/* <div className="sidebar">
-          {menuItems.map((item) => (
-            <Link key={item.id} to={item.path} className="menu-item">
-              <item.icon className="icon" />
-              <span className="label">{item.label}</span>
-            </Link>
-          ))}
-        </div> */}
-
         <div className="content">
           <section className="banner">
             {banners.map((src, i) => (
@@ -104,48 +92,6 @@ function Home({ className, banners, secGames }) {
               </div>
             </section>
           ))}
-
-          {/* <section className="games-section">
-            <div className="section-header">
-              <div>
-                <img src="/images/card.jpeg" className="section-icon" />
-                <h2>บาคาร่าออนไลน์</h2>
-              </div>
-
-              <button onClick={() => handleGameClick('/games/baccarat')}>เล่นเกม</button>
-            </div>
-
-            <div className="games-grid">
-              <div className="game-card large">
-                <span className="game-title"></span>
-              </div>
-              <div className="game-cards-small">
-                <div className="game-card small"></div>
-                <div className="game-card small"></div>
-              </div>
-            </div>
-          </section>
-
-          <section className="games-section">
-            <div className="section-header">
-              <div>
-                <img src="/images/pngegg.png" className="section-icon" />
-                <h2>พนันฟุตบอล</h2>
-              </div>
-
-              <button onClick={() => handleGameClick('/games/ballgame')}>เล่นเกม</button>
-            </div>
-
-            <div className="games-grid">
-              <div className="game-card large">
-                <span className="game-title"></span>
-              </div>
-              <div className="game-cards-small">
-                <div className="game-card small"></div>
-                <div className="game-card small"></div>
-              </div>
-            </div>
-          </section> */}
 
           <section className="info-game">
             <h2 className="brand-title">Caroo888</h2>
@@ -207,8 +153,6 @@ export default styled(Home)`
   width: 100%;
   height: auto;
   background-image: url('/images/bg_v2.png');
-  /* background-size: cover; */
-  /* background-position: center; */
   background-repeat: no-repeat;
   background-color: #222426;
 
@@ -218,56 +162,8 @@ export default styled(Home)`
     max-width: 1300px;
     margin: 0 auto;
 
-    /* .sidebar {
-      width: 220px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-
-      .menu-item {
-        width: 180px;
-        height: 64px;
-        margin-top: 15px;
-        background: #e89300;
-        border: none;
-        border-radius: 14px;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-start;
-        padding-left: 10px;
-        gap: 10px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        color: #000000;
-        text-decoration: none;
-
-        &:hover {
-          opacity: 0.8;
-          transform: scale(1.05);
-        }
-
-        svg {
-          color: #000000;
-          fill: currentColor;
-          stroke: currentColor;
-          flex-shrink: 0;
-          background: #e89300;
-        }
-
-        .label {
-          font-size: 15px;
-          color: #000000;
-          font-weight: 500;
-          background: #e89300;
-        }
-      }
-    } */
-
     .content {
       flex: 1;
-      /* padding-right: 2rem; */
       margin-top: 15px;
 
       .banner {
@@ -284,7 +180,6 @@ export default styled(Home)`
         left: 0;
         width: 100%;
         height: 100%;
-        /* object-fit: cover; */
         opacity: 0;
         transition: opacity 1s ease;
       }

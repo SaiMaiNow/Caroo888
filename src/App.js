@@ -5,6 +5,7 @@ import GlobalStyle from "./GlobalStyle";
 import Barcarat from "./component/games/Barcarat";
 import Home from "./component/Home";
 import Ballgame from "./component/games/Ballgame";
+import Slot from "./component/games/Slot";
 
 import Auth from "./component/Auth"
 import NotFound from "./component/NotFound"
@@ -24,7 +25,7 @@ const GAMES = [
     title: "สล็อตออนไลน์",
     icon: "/images/slot.jpeg",
     path: "/games/slot",
-    component: <NotFound />,
+    component: <Slot />,
     images: [
       "/images/banner/1.png",
       "/images/banner/2.png",

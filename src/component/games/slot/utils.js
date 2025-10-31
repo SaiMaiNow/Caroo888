@@ -110,3 +110,21 @@ export const createRandomGrid = () => {
   }
   return newGrid;
 };
+
+// --- 2.5. Create Losing Grid (สร้างตารางที่แพ้แน่นอน) ---
+export const createLosingGrid = () => {
+  const newGrid = [];
+  for (let r = 0; r < GRID_SIZE; r++) {
+    const row = [];
+    for (let c = 0; c < GRID_SIZE; c++) {
+      // สร้าง symbol แบบไม่มีทางชนะ โดยไม่มี cluster >= 5
+      // ใช้ pattern ที่สลับ symbols ให้ไม่มี 5 ตัวติดกัน (แนวนอน/แนวตั้ง)
+      // Pattern: r*c + offset เพื่อให้สลับ pattern
+      const symbolIndex = (r * 3 + c * 2 + (r % 2) * 3) % SYMBOL_LIST.length;
+      const symbol = SYMBOL_LIST[symbolIndex];
+      row.push({ symbol, multiplier: 1 });
+    }
+    newGrid.push(row);
+  }
+  return newGrid;
+};

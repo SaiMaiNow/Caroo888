@@ -14,7 +14,7 @@ function Baccarat({ className }) {
   const [cards, setCards] = useState({ player: [], banker: [], points: { p: 0, b: 0 } });
   const timerRef = useRef(null);
   const user = useSelector((state) => state.user);
-  console.log("user:", user);
+  // console.log("user:", user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -192,8 +192,6 @@ useEffect(() => {
         payout += b.amount * rate;
       }
     });
-
-
 
     setTimeout(() => {
       dispatch(addBalance({ amount: payout }));
