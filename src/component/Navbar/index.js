@@ -143,7 +143,7 @@ function Navbar({ className }) {
           </svg>
           โปรโมชั่น
         </button>
-        <Link to="/contact">
+        <Link to="https://github.com/SaiMaiNow/Caroo888" target="_blank" >
           <svg
             className="icon"
             xmlns="http://www.w3.org/2000/svg"
