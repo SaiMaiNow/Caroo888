@@ -9,6 +9,7 @@ import Admin from "./component/Admin"
 import UserDetailPage from './component/UserDetailPage';
 import Auth from "./component/Auth"
 import NotFound from "./component/NotFound"
+import Promotion from './component/Promotion';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/user/:id" element={<UserDetailPage />} />
         <Route path="/auth/:type" element={<Auth />} />
+        <Route path="/promotion" element={<Promotion />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
