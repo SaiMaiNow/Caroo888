@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import styled from "styled-components";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchUser } from '../../features/user/userSlice'
 
 function Navbar({ className }) {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.user)
-  const navigate = useNavigate()
 
   useEffect(() => {
     dispatch(fetchUser())
@@ -79,6 +78,10 @@ export default styled(Navbar)`
   margin-bottom: 20px;
   /* border-bottom: 2px solid #E89300; */
   box-shadow: 0 0 20px 2px rgba(232, 147, 0, 0.8);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #070A0B;
 
   .left {
     display: flex;
