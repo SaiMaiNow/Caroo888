@@ -1,10 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
 import GlobalStyle from './GlobalStyle';
 
-import Barcarat from "./component/games/Barcarat"
+import Barcarat from "./component/Games/Barcarat"
 import Home from "./component/Home"
-import Test from "./component/Test"
-import Ballgame from './component/games/Ballgame';  
+import Ballgame from './component/Games/Ballgame';  
 
 import Admin from "./component/Admin"
 import UserDetailPage from './component/UserDetailPage';
@@ -16,12 +15,11 @@ function App() {
     <>
       <GlobalStyle />
       <Routes>
-        <Route path="/games/Barcarat" element={<Barcarat />} />
         <Route path="/" element={<Home />} />
-        <Route path="/Ballgame" element={<Ballgame />} />
-        <Route path="/Admin" element={<Admin />} />
+        <Route path="/games/ballgame" element={<Ballgame />} />
+        <Route path="/games/barcarat" element={<Barcarat />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="/admin/user/:id" element={<UserDetailPage />} />
-        <Route path="/test" element={<Test />} />
         <Route path="/auth/:type" element={<Auth />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

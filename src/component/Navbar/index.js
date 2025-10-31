@@ -1,7 +1,18 @@
+import React, { useEffect, useState } from 'react'
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchUser } from '../../features/user/userSlice'
 
 function Navbar({ className }) {
+  const dispatch = useDispatch()
+  const user = useSelector((state) => state.user)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    dispatch(fetchUser())
+  }, [dispatch])
+
   return (
     <header className={className}>
       <div className="left">
@@ -34,12 +45,24 @@ function Navbar({ className }) {
       </nav>
 
       <div className="actions">
-        <Link to="/register" className="btn register">
-          สมัครสมาชิก
-        </Link>
-        <Link to="/login" className="btn login">
-          เข้าสู่ระบบ
-        </Link>
+        {user && user?.isLoggedIn && user?.isDataLoaded ? (
+          <div className="user-info">
+            <p>{user.balance}THB</p>
+            <button>ฝาก</button>
+            <div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M4 22a8 8 0 1 1 16 0zm8-9c-3.315 0-6-2.685-6-6s2.685-6 6-6s6 2.685 6 6s-2.685 6-6 6" /></svg>
+            </div>
+          </div>
+        ) : (
+          <>
+            <Link to="/auth/register" className="btn register">
+              สมัครสมาชิก
+            </Link>
+            <Link to="/auth/login" className="btn login">
+              เข้าสู่ระบบ
+            </Link>
+          </>
+        )}
       </div>
     </header>
   );
@@ -145,6 +168,35 @@ export default styled(Navbar)`
       &:hover {
         transform: translateY(-1px);
         opacity: 0.9; //ทึบแสงขึ้น
+      }
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: white;
+      font-size: 1.2rem;
+
+      button {
+        background: #E89300;
+        border: none;
+        color: black;
+        font-size: 1rem;
+        cursor: pointer;
+        padding: 0.4rem 1rem;
+        border-radius: 0.5rem;
+      }
+
+      div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid white;
+        color: white;
+        font-size: 1rem;
+        padding: 0.4rem 0.6rem;
+        border-radius: 0.5rem;
       }
     }
   }
