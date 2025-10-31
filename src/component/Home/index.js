@@ -71,7 +71,7 @@ function Home({ className, banners, secGames }) {
               {banners.map((_, index) => (
                 <div
                   key={index}
-                  className={`dot ${index === currentBanner ? "active" : ""}`}
+                  className={`dot ${index === currentBanner ? "active" : "/"}`}
                   onClick={() => setCurrentBanner(index)}
                 />
               ))}
