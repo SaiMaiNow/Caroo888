@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,7 +13,6 @@ function Navbar({ className }) {
   const [showUserInfo, setShowUserInfo] = useState(false);
   const menuRef = useRef(null);
   const menuButtonRef = useRef(null);
-  const navigate = useNavigate();
 
   const [showPromotion, setShowPromotion] = useState(false);
 
