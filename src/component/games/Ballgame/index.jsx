@@ -310,7 +310,7 @@ function FootballLuckGameMiniStyled({ className }) {
 
           if (result.win === "draw") {
             outcomeLabel = "เสมอ";
-            payoutAmount = 0;
+            payoutAmount = bet.amt; // คืนเงิน
           } else if (result.win === bet.team) {
             outcomeLabel = "ชนะ";
             isWinner = true;
@@ -340,6 +340,9 @@ function FootballLuckGameMiniStyled({ className }) {
         );
         if (!r) return;
         if (r.win === b.team) gain += Math.round(b.amt * b.rate);
+        else if (r.win === "draw") {
+          gain += b.amt; // ✅ คืนเงิน
+        }
       });
 
       if (gain > 0) {
@@ -513,7 +516,7 @@ function FootballLuckGameMiniStyled({ className }) {
                     วันที่แข่ง: {r.date} <br />
                     เวลาจบแมตช์: {r.time}ิ
                     <br />
-                    --------------------------------------------
+                    ---------------------------------------
                   </p>
                 ))
               )}
@@ -545,7 +548,7 @@ function FootballLuckGameMiniStyled({ className }) {
                           : `-฿${Math.abs(b.payout)}`
                         : `฿0`}
                       <br />
-                      --------------------------------------------
+                      ---------------------------------------
                     </p>
                   ))
               )}
