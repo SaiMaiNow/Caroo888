@@ -9,6 +9,7 @@ import Admin from "./component/Admin"
 import UserDetailPage from './component/UserDetailPage';
 import Auth from "./component/Auth"
 import NotFound from "./component/NotFound"
+import UserInfo from './component/UserInfo';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <GlobalStyle />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/user" element={<UserInfo />} />
         <Route path="/games/ballgame" element={<Ballgame />} />
         <Route path="/games/baccarat" element={<Barcarat />} />
         <Route path="/admin" element={<Admin />} />
