@@ -103,10 +103,10 @@ function Home({ className }) {
   const [currentBanner, setCurrentBanner] = useState(0);
 
   const banners = [
-    "/images/1.png",
-    "/images/2.jpg",
-    "/images/3.webp",
-    "/images/4.webp",
+    "/images/01_CR.png",
+    "/images/02_CR.png",
+    "/images/03_CR.png",
+    "/images/04_CR.png",
   ];
 
   useEffect(() => {
@@ -145,7 +145,7 @@ function Home({ className }) {
               {banners.map((_, index) => (
                 <div
                   key={index}
-                  className={`dot ${index === currentBanner ? "active" : ""}`}
+                  className={`dot ${index === currentBanner ? "active" : "/"}`}
                   onClick={() => setCurrentBanner(index)}
                 />
               ))}

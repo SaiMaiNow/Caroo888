@@ -36,10 +36,14 @@ function App({ className }) {
 
   // check Login
   useEffect(() => {
-    if (!user.isLoggedIn) {
-      navigate('/');
-    }
-  }, [user.isLoggedIn, navigate]);
+      dispatch(fetchUser())
+    }, [dispatch])
+  
+    useEffect(() => {
+      if (!user.isLoggedIn && user.isDataLoaded) {
+        navigate('/')
+      }
+    }, [user.isLoggedIn, user.isDataLoaded, navigate])
 
   // Highlight State
   const [winningCells, setWinningCells] = useState(new Set());
