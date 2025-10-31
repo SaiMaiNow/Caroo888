@@ -1,14 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addBalance, subtractBalance } from '../../../features/user/userSlice';
+import { addBalance, subtractBalance, fetchUser, played } from '../../../features/user/userSlice';
+import axios from 'axios';
 
 import styled from 'styled-components';
 import bg from './assets/bg.jpg';
 import { GameCanvas } from './features/GameCanvas';
 import { StatsDisplay } from './features/StatsDisplay';
 import { ControlPanel } from './features/ControlPanel';
-import { delay, tickNumber, findClusters, createRandomGrid } from './utils';
+import { delay, tickNumber, findClusters, createRandomGrid, createLosingGrid } from './utils';
 import {
   BET_AMOUNTS, DEFAULT_BET_INDEX,
   FREE_SPINS_TRIGGER_COUNT, BASE_FREE_SPINS_AWARDED,
@@ -21,7 +22,7 @@ import {
 function App({ className }) {
 
   const navigate = useNavigate();
-  
+
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const [grid, setGrid] = useState([]);
@@ -36,14 +37,14 @@ function App({ className }) {
 
   // check Login
   useEffect(() => {
-      dispatch(fetchUser())
-    }, [dispatch])
-  
-    useEffect(() => {
-      if (!user.isLoggedIn && user.isDataLoaded) {
-        navigate('/')
-      }
-    }, [user.isLoggedIn, user.isDataLoaded, navigate])
+    dispatch(fetchUser())
+  }, [dispatch])
+
+  useEffect(() => {
+    if (!user.isLoggedIn && user.isDataLoaded) {
+      navigate('/')
+    }
+  }, [user.isLoggedIn, user.isDataLoaded, navigate])
 
   // Highlight State
   const [winningCells, setWinningCells] = useState(new Set());
@@ -57,6 +58,11 @@ function App({ className }) {
   const [freeSpinTotalWin, setFreeSpinTotalWin] = useState(0);
   const [freeSpinTotalMultiplier, setFreeSpinTotalMultiplier] = useState(0);
   const [showFreeSpinSummary, setShowFreeSpinSummary] = useState(false);
+
+  const fetchRate = async () => {
+    const response = await axios.get('http://localhost:4567/api/v1/luck/getrate', { withCredentials: true });
+    return response.data.isPay;
+  };
 
   // --- Refs ---
   const currentBet = BET_AMOUNTS[currentBetIndex];
@@ -92,16 +98,26 @@ function App({ className }) {
     const isThisAFreeSpin = isFreeSpins;
     const spinDuration = (isThisAFreeSpin ? false : isTurbo) ? SPIN_DURATION_TURBO : SPIN_DURATION_NORMAL;
 
-    if (isThisAFreeSpin) {
-      setMessage(`ฟรีสปิน! (รอบที่ ${freeSpinsLeft})`);
-    } else {
+    // ตรวจสอบ rate จาก API (เฉพาะ spin ปกติ ไม่ใช่ free spin)
+    let allowWin = true;
+    if (!isThisAFreeSpin) {
+      try {
+        const rateData = await fetchRate();
+        allowWin = rateData;
+      } catch (error) {
+        console.error('Error fetching rate:', error);
+        allowWin = true;
+      }
+      
       if (user.balance < currentBet) {
         setMessage("เงินไม่พอ!");
         setSpinning(false);
         return;
       }
-      dispatch(subtractBalance(currentBet));
+      dispatch(subtractBalance({ amount: currentBet }));
       setMessage("...หมุน...");
+    } else {
+      setMessage(`ฟรีสปิน! (รอบที่ ${freeSpinsLeft})`);
     }
 
     setSpinWin(0);
@@ -115,6 +131,12 @@ function App({ className }) {
       currentGrid = createRandomGrid();
       setGrid(currentGrid);
       await delay(50);
+    }
+    
+    // ถ้าไม่อนุญาตให้ชนะ ให้ใช้ losing grid
+    if (!isThisAFreeSpin && !allowWin) {
+      currentGrid = createLosingGrid();
+      setGrid(currentGrid);
     }
 
     if (!isThisAFreeSpin) {
@@ -140,7 +162,8 @@ function App({ className }) {
     let clusters = findClusters(currentGrid);
     let didWin = clusters.length > 0;
 
-    if (!didWin && !isThisAFreeSpin && user.lucknumber > 0) {
+    // Pity chance (เฉพาะเมื่อ allowWin = true และไม่ใช่ free spin)
+    if (!didWin && !isThisAFreeSpin && allowWin && user.lucknumber > 0) {
       const pityChance = user.lucknumber / 400;
       if (Math.random() < pityChance) {
         currentGrid[0][0] = { symbol: SYMBOLS.S1, multiplier: 1 };
@@ -167,7 +190,7 @@ function App({ className }) {
         let payoutSize = Math.min(size, 36);
         let payout = 0;
         while (payoutSize >= MIN_CLUSTER_SIZE && payout === 0) {
-          payout = PAYTABLE[`${symbol}_${payoutSize}`] || 0;
+          payout = PAYTABLE[`${symbol.label}_${payoutSize}`] || 0;
           payoutSize--;
         }
 
@@ -189,7 +212,9 @@ function App({ className }) {
         subtractLuck(15); // ใช้ฟังก์ชันที่สร้างขึ้น
       } else {
         const finalWin = await runWinAnimation(baseWin, currentSpinMultiplier);
-        dispatch(addBalance(finalWin));
+        if (!isNaN(finalWin) && isFinite(finalWin) && finalWin > 0) {
+          dispatch(addBalance({ amount: finalWin }));
+        }
         setMessage(`คุณชนะ ${finalWin.toLocaleString()}!`);
         subtractLuck(10); // ใช้ฟังก์ชันที่สร้างขึ้น
       }
@@ -203,6 +228,11 @@ function App({ className }) {
       } else {
         addLuck(2); // ใช้ฟังก์ชันที่สร้างขึ้น
       }
+    }
+
+    // dispatch played หลังจากเล่นเสร็จ
+    if (!isThisAFreeSpin) {
+      dispatch(played());
     }
 
     setSpinning(false);
@@ -254,9 +284,13 @@ function App({ className }) {
 
   const handleCloseSummary = () => {
     const finalAmount = freeSpinTotalWin * (freeSpinTotalMultiplier > 0 ? freeSpinTotalMultiplier : 1);
-    dispatch(addBalance(finalAmount));
+    if (!isNaN(finalAmount) && isFinite(finalAmount) && finalAmount > 0) {
+      dispatch(addBalance({ amount: finalAmount }));
+    }
     setShowFreeSpinSummary(false);
     setIsFreeSpins(false);
+    setFreeSpinTotalWin(0);
+    setFreeSpinTotalMultiplier(0);
     setMessage("กด 'หมุน!' เพื่อเริ่ม");
   };
 
@@ -308,7 +342,7 @@ function App({ className }) {
         isTurbo={isTurbo}
         currentBet={currentBet}
         freeSpinsLeft={freeSpinsLeft}
-        luck={user.lucknumber}
+        userName={user.firstname}
         balance={user.balance}
         onChangeBet={handleChangeBet}
         onSpin={handleSpin}

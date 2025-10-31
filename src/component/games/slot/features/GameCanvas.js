@@ -1,31 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { GRID_SIZE, CELL_SIZE } from '../constants';
+import { GRID_SIZE, CELL_SIZE, SYMBOLS } from '../constants';
 import { FreeSpinSummary } from './FreeSpinSummary';
-
-// Preload symbol images and map from the current emoji symbols to image URLs
-import truffleImg from '../assets/truffle2.png';
-import strawberryImg from '../assets/strawberry2.png';
-import blueImg from '../assets/blue2.png';
-import orangeImg from '../assets/orange2.png';
-import spadeImg from '../assets/spade.png';
-import heartImg from '../assets/heart.png';
-import clubImg from '../assets/club.png';
-import diamondImg from '../assets/diamond.png';
-import wildImg from '../assets/wild2.png';
-import scatterImg from '../assets/scatter2.png';
-
-const SYMBOL_IMAGE_URL_MAP = {
-  '🌰': truffleImg,
-  '🍓': strawberryImg,
-  '💧': blueImg,
-  '🍊': orangeImg,
-  '♠️': spadeImg,
-  '♥️': heartImg,
-  '♣️': clubImg,
-  '♦️': diamondImg,
-  '🃏': wildImg,
-  '🎁': scatterImg,
-};
 
 export function GameCanvas({
   grid, spinning, winningCells, isFreeSpins,
@@ -33,7 +8,7 @@ export function GameCanvas({
   showFreeSpinSummary, freeSpinTotalWin, freeSpinTotalMultiplier, onCloseSummary
 }) {
   const canvasRef = useRef(null);
-  const imageElementsRef = useRef({});
+  const imageElementsRef = useRef(new Map());
   const [imagesReadyVersion, setImagesReadyVersion] = useState(0);
 
   const drawRoundedRect = (ctx, x, y, w, h, r) => {
@@ -53,16 +28,17 @@ export function GameCanvas({
 
   // Preload images once
   useEffect(() => {
-    const map = {};
-    const urls = SYMBOL_IMAGE_URL_MAP;
+    const map = new Map();
+    const symbolArray = Object.values(SYMBOLS);
     let loadedCount = 0;
-    const symbols = Object.keys(urls);
-    const total = symbols.length;
-    symbols.forEach((sym) => {
+    const total = symbolArray.length;
+    
+    symbolArray.forEach((symbolObj) => {
       const img = new Image();
-      img.src = urls[sym];
+      img.src = symbolObj.image;
       img.onload = () => {
         loadedCount += 1;
+        map.set(symbolObj, img);
         if (loadedCount === total) {
           setImagesReadyVersion((v) => v + 1);
         } else {
@@ -71,10 +47,10 @@ export function GameCanvas({
         }
       };
       img.onerror = () => {
+        loadedCount += 1;
         // Still trigger to avoid blocking renders
         setImagesReadyVersion((v) => v + 1);
       };
-      map[sym] = img;
     });
     imageElementsRef.current = map;
   }, []);
@@ -142,8 +118,8 @@ export function GameCanvas({
         drawRoundedRect(ctx, rx, ry, rw, rh, radius);
         ctx.stroke();
 
-        if (cell) {
-          const img = imageElementsRef.current[cell.symbol];
+        if (cell && cell.symbol) {
+          const img = imageElementsRef.current.get(cell.symbol);
           const hasImg = img && img.complete && img.naturalWidth > 0;
           if (hasImg) {
             const padding = 10;
@@ -152,11 +128,13 @@ export function GameCanvas({
             const drawSize = CELL_SIZE - padding * 2;
             ctx.drawImage(img, drawX, drawY, drawSize, drawSize);
           } else {
+            // Fallback: draw symbol label as text
             ctx.font = '40px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillStyle = 'white';
-            ctx.fillText(cell.symbol, x + CELL_SIZE / 2, y + CELL_SIZE / 2);
+            const label = cell.symbol.label || '?';
+            ctx.fillText(label, x + CELL_SIZE / 2, y + CELL_SIZE / 2);
           }
 
           if (cell.multiplier > 1) {

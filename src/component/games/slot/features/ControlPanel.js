@@ -2,7 +2,7 @@ import React from 'react';
 
 export function ControlPanel({
   spinning, isFreeSpins, isAutoSpinningFreeSpins, isTurbo,
-  currentBet, freeSpinsLeft, luck, balance,
+  currentBet, freeSpinsLeft, userName, balance,
   onChangeBet, onSpin, onToggleTurbo
 }) {
   return (
@@ -55,8 +55,8 @@ export function ControlPanel({
         </button>
         
         <div className="css-small-stat-row">
-          <span className="css-small-stat-label">Luck:</span>
-          <span className="css-small-stat-luck">{luck}</span>
+          <span className="css-small-stat-label">UserName:</span>
+          <span className="css-small-stat-luck">{userName}</span>
         </div>
         <div className="css-small-stat-row">
           <span className="css-small-stat-label">Balance:</span>
