@@ -8,6 +8,7 @@ import Ballgame from './component/games/Ballgame';
 
 import Auth from "./component/Auth"
 import NotFound from "./component/NotFound"
+import Promotion from './component/Promotion';
 import UserInfo from './component/UserInfo';
 
 const BANNERS = [
@@ -73,6 +74,7 @@ function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/user/:id" element={<UserDetailPage />} />
         <Route path="/auth/:type" element={<Auth />} />
+        <Route path="/promotion" element={<Promotion />} />
         <Route path="*" element={<NotFound />} />
 
         {games.map((game) => (
