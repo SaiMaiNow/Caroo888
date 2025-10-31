@@ -1,19 +1,61 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchUser } from '../../features/user/userSlice'
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUser, logout } from "../../features/user/userSlice";
 import Promotion from "../Promotion";
 
 function Navbar({ className }) {
-  const dispatch = useDispatch()
-  const user = useSelector((state) => state.user)
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+  const menuButtonRef = useRef(null);
 
   const [showPromotion, setShowPromotion] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchUser())
-  }, [dispatch])
+    dispatch(fetchUser());
+  }, [dispatch]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(event.target)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
+  const handleOpenMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleDeposit = () => {
+    // navigate('/deposit')
+  };
+
+  const handleMyAccount = () => {
+    setIsMenuOpen(false);
+    // navigate('/my-account')
+  };
+
+  const handleLogout = () => {
+    setIsMenuOpen(false);
+    dispatch(logout());
+  };
 
   return (
     <header className={className}>
@@ -22,29 +64,91 @@ function Navbar({ className }) {
           Caroo888
         </Link>
         <div className="tagline">
-          <svg className="gem-icon" xmlns="http://www.w3.org/2000/svg" width="1.13em" height="1em" viewBox="0 0 576 512"><path fill="currentColor" d="M464 0H112c-4 0-7.8 2-10 5.4L2 152.6c-2.9 4.4-2.6 10.2.7 14.2l276 340.8c4.8 5.9 13.8 5.9 18.6 0l276-340.8c3.3-4.1 3.6-9.8.7-14.2L474.1 5.4C471.8 2 468.1 0 464 0m-19.3 48l63.3 96h-68.4l-51.7-96zm-202.1 0h90.7l51.7 96H191zm-111.3 0h56.8l-51.7 96H68zm-43 144h51.4L208 352zm102.9 0h193.6L288 435.3zM368 352l68.2-160h51.4z"></path></svg>
+          <svg
+            className="gem-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="1.13em"
+            height="1em"
+            viewBox="0 0 576 512"
+          >
+            <path
+              fill="currentColor"
+              d="M464 0H112c-4 0-7.8 2-10 5.4L2 152.6c-2.9 4.4-2.6 10.2.7 14.2l276 340.8c4.8 5.9 13.8 5.9 18.6 0l276-340.8c3.3-4.1 3.6-9.8.7-14.2L474.1 5.4C471.8 2 468.1 0 464 0m-19.3 48l63.3 96h-68.4l-51.7-96zm-202.1 0h90.7l51.7 96H191zm-111.3 0h56.8l-51.7 96H68zm-43 144h51.4L208 352zm102.9 0h193.6L288 435.3zM368 352l68.2-160h51.4z"
+            ></path>
+          </svg>
           <span>เล่นง่าย ได้จริง</span>
         </div>
       </div>
 
       <nav className="menu">
         <Link to="/">
-          <svg className="icon" xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24"><g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></g></svg>
+          <svg
+            className="icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width={30}
+            height={30}
+            viewBox="0 0 24 24"
+          >
+            <g
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+            >
+              <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
+              <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </g>
+          </svg>
           หน้าแรก
         </Link>
         <Link to="/deposit">
-          <svg className="icon" xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.25a.75.75 0 0 1 .75.75v1.25H17a.75.75 0 0 1 0 1.5h-4.25v5.5h1.75a4.25 4.25 0 0 1 0 8.5h-1.75V21a.75.75 0 0 1-1.5 0v-1.25H6a.75.75 0 0 1 0-1.5h5.25v-5.5H9.5a4.25 4.25 0 0 1 0-8.5h1.75V3a.75.75 0 0 1 .75-.75m-.75 3.5H9.5a2.75 2.75 0 0 0 0 5.5h1.75zm1.5 7v5.5h1.75a2.75 2.75 0 1 0 0-5.5z"></path></svg>
+          <svg
+            className="icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width={30}
+            height={30}
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="M12 2.25a.75.75 0 0 1 .75.75v1.25H17a.75.75 0 0 1 0 1.5h-4.25v5.5h1.75a4.25 4.25 0 0 1 0 8.5h-1.75V21a.75.75 0 0 1-1.5 0v-1.25H6a.75.75 0 0 1 0-1.5h5.25v-5.5H9.5a4.25 4.25 0 0 1 0-8.5h1.75V3a.75.75 0 0 1 .75-.75m-.75 3.5H9.5a2.75 2.75 0 0 0 0 5.5h1.75zm1.5 7v5.5h1.75a2.75 2.75 0 1 0 0-5.5z"
+            ></path>
+          </svg>
           ฝาก ถอน
         </Link>
-        <button
-            className="promo-btn"
-            onClick={() => setShowPromotion(true)}
+        <button className="promo-btn" onClick={() => setShowPromotion(true)}>
+          <svg
+            className="icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width={30}
+            height={30}
+            viewBox="0 0 24 24"
           >
-          <svg className="icon" xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24"><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 12v9.4a.6.6 0 0 1-.6.6H4.6a.6.6 0 0 1-.6-.6V12m17.4-5H2.6a.6.6 0 0 0-.6.6v3.8a.6.6 0 0 0 .6.6h18.8a.6.6 0 0 0 .6-.6V7.6a.6.6 0 0 0-.6-.6M12 22V7m0 0H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7m0 0h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7"></path></svg>
+            <path
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M20 12v9.4a.6.6 0 0 1-.6.6H4.6a.6.6 0 0 1-.6-.6V12m17.4-5H2.6a.6.6 0 0 0-.6.6v3.8a.6.6 0 0 0 .6.6h18.8a.6.6 0 0 0 .6-.6V7.6a.6.6 0 0 0-.6-.6M12 22V7m0 0H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7m0 0h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7"
+            ></path>
+          </svg>
           โปรโมชั่น
-          </button>
+        </button>
         <Link to="/contact">
-          <svg className="icon" xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24"><path fill="#ffb83f" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2m0 14H4V6h16zM4 0h16v2H4m0 20h16v2H4m8-12a2.5 2.5 0 0 0 0-5a2.5 2.5 0 0 0 0 5m0-3.5c.55 0 1 .45 1 1s-.45 1-1 1s-1-.45-1-1s.45-1 1-1m5 7.5c0-2.1-3.31-3-5-3s-5 .9-5 3v1h10zm-8.19-.5c.61-.5 2.03-1 3.19-1c1.17 0 2.59.5 3.2 1z"></path></svg>
+          <svg
+            className="icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width={30}
+            height={30}
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#ffb83f"
+              d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2m0 14H4V6h16zM4 0h16v2H4m0 20h16v2H4m8-12a2.5 2.5 0 0 0 0-5a2.5 2.5 0 0 0 0 5m0-3.5c.55 0 1 .45 1 1s-.45 1-1 1s-1-.45-1-1s.45-1 1-1m5 7.5c0-2.1-3.31-3-5-3s-5 .9-5 3v1h10zm-8.19-.5c.61-.5 2.03-1 3.19-1c1.17 0 2.59.5 3.2 1z"
+            ></path>
+          </svg>
           ติดต่อเรา
         </Link>
       </nav>
@@ -53,10 +157,20 @@ function Navbar({ className }) {
         {user && user?.isLoggedIn && user?.isDataLoaded ? (
           <div className="user-info">
             <p>{user.balance}THB</p>
-            <button>ฝาก</button>
-            <div>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M4 22a8 8 0 1 1 16 0zm8-9c-3.315 0-6-2.685-6-6s2.685-6 6-6s6 2.685 6 6s-2.685 6-6 6" /></svg>
-            </div>
+            <button onClick={handleDeposit}>ฝาก</button>
+            <button ref={menuButtonRef} onClick={handleOpenMenu}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M4 22a8 8 0 1 1 16 0zm8-9c-3.315 0-6-2.685-6-6s2.685-6 6-6s6 2.685 6 6s-2.685 6-6 6"
+                />
+              </svg>
+            </button>
           </div>
         ) : (
           <>
@@ -70,14 +184,47 @@ function Navbar({ className }) {
         )}
       </div>
 
-      {showPromotion && (
-        <Promotion onClose={() => setShowPromotion(false)} />
+      {isMenuOpen && (
+        <div ref={menuRef} className="menu-overlay">
+          <div className="menu-content">
+            <button onClick={handleMyAccount}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M12 4a4 4 0 0 1 4 4a4 4 0 0 1-4 4a4 4 0 0 1-4-4a4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"
+                />
+              </svg>
+              บัญชีของฉัน
+            </button>
+            <button onClick={handleLogout}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z"
+                />
+              </svg>
+              ออกจากระบบ
+            </button>
+          </div>
+        </div>
       )}
+      {showPromotion && <Promotion onClose={() => setShowPromotion(false)} />}
     </header>
   );
 }
 
 export default styled(Navbar)`
+  position: relative;
   font-family: "Italiana", serif;
   height: 100px;
   width: 100%;
@@ -91,7 +238,7 @@ export default styled(Navbar)`
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: #070A0B;
+  background-color: #070a0b;
 
   .left {
     display: flex;
@@ -145,7 +292,6 @@ export default styled(Navbar)`
         color: #ffb703;
         transform: scale(1.05);
       }
-
     }
   }
 
@@ -196,7 +342,7 @@ export default styled(Navbar)`
       font-size: 1.2rem;
 
       button {
-        background: #E89300;
+        background: #e89300;
         border: none;
         color: black;
         font-size: 1rem;
@@ -205,7 +351,7 @@ export default styled(Navbar)`
         border-radius: 0.5rem;
       }
 
-      div {
+      button:last-child {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -214,6 +360,55 @@ export default styled(Navbar)`
         font-size: 1rem;
         padding: 0.4rem 0.6rem;
         border-radius: 0.5rem;
+        background: transparent;
+      }
+    }
+  }
+
+  .menu-overlay {
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    top: 75px;
+    right: 50px;
+    padding: 0.5rem 0.7rem;
+    width: 150px;
+    background: #070a0b;
+    z-index: 100;
+    border-radius: 0.5rem 0 0.5rem 0.5rem;
+    border: 1px solid white;
+
+    .menu-content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      color: white;
+      font-size: 1rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      justify-content: center;
+      align-items: center;
+
+      button {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+        font-weight: 500;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #e89300;
       }
     }
   }
