@@ -10,7 +10,7 @@ import {
   fetchUser,
 } from "../../../features/user/userSlice";
 
-const API_URL = "http://localhost:4567/api/v1"; 
+const API_URL = "http://localhost:4567/api/v1";
 
 async function fetchLuckRate() {
   try {
@@ -18,10 +18,10 @@ async function fetchLuckRate() {
       withCredentials: true,
     });
     // axios จะโยน error ถ้าไม่ใช่ status 200–299
-    return res.data.winRate; 
+    return res.data.isPay;
   } catch (err) {
     console.error("Error fetching luck rate:", err);
-    return null;
+    return true;
   }
 }
 
@@ -57,7 +57,7 @@ function FootballLuckGameMiniStyled({ className }) {
 
   const [teams, setTeams] = useState(TEAMS); //ตารางคะแนน
   const user = useSelector((state) => state.user);
-  console.log("user:", user);
+  // console.log("user:", user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [matches, setMatches] = useState([]); //จับคู่
@@ -82,19 +82,13 @@ function FootballLuckGameMiniStyled({ className }) {
     [team]: Math.floor(Math.random() * 4),
     [opp]: Math.floor(Math.random() * 6) + 5,
   });
-
-  useEffect(() => {
-     if (user.isLoggedIn) {
-       fetchLuckRate().then(rate => {
-         if (rate !== null) {
-           setLuckRate(rate);
-         }
-       });
-     }
-  }, [user.isLoggedIn]);
+  const forceWin = (team, opp) => ({
+    [team]: Math.floor(Math.random() * 6) + 5,
+    [opp]: Math.floor(Math.random() * 4),
+  });
 
   const checkLuck = () => {
-    return luckRate;
+    return user.lucknumber;
   };
 
   useEffect(() => {
@@ -171,15 +165,7 @@ function FootballLuckGameMiniStyled({ className }) {
     // ตรวจสอบยอดเพียงพอ
     if (amt > (user.balance ?? 0)) return alert("ยอดเงินไม่พอสำหรับเดิมพันนี้");
 
-    if (
-      (user.bets ?? []).find(
-        (b) =>
-          b.match === matchIndex &&
-          b.teamA === matches[matchIndex].teamA &&
-          b.teamB === matches[matchIndex].teamB
-      )
-    )
-      return alert("คุณเดิมพันคู่นี้แล้ว");
+    if ((user.bets ?? []).find((b) => b.match === matchIndex && b.teamA === matches[matchIndex].teamA && b.teamB === matches[matchIndex].teamB)) return alert("คุณเดิมพันคู่นี้แล้ว");
 
     const now = new Date();
     const dateStr = `${now.getDate()}/${now.getMonth() + 1}`;
@@ -204,6 +190,7 @@ function FootballLuckGameMiniStyled({ className }) {
 
     // ลดยอดผู้เล่นผ่าน thunk (API) และเก็บ bet ลง local state
     dispatch(subtractBalance({ amount: amt }));
+    dispatch(played());
     setUserBets((prev) => [...prev, payload]);
 
     // เก็บ log เป็น copy (ไม่ชี้ไปยัง matches)
@@ -223,7 +210,7 @@ function FootballLuckGameMiniStyled({ className }) {
     setTempAmount("");
   };
 
-  const endRound = () => {
+  const endRound = async () => {
     if (showModal) {
       setShowModal(false);
       alert("หมดเวลาวางเดิมพันแล้ว!");
@@ -237,6 +224,8 @@ function FootballLuckGameMiniStyled({ className }) {
     //เก็บสำเนา (snapshot) ของ state ปัจจุบัน (user และ userBets) เพื่อป้องกันปัญหา stale state ภายใน setTimeout
     const userSnapshot = { ...user };
     const betsSnapshot = [...userBets];
+    // Fetch ispay ก่อนสร้างผลการแข่งขัน
+    const isPaySnapshot = await fetchLuckRate();
     //user อาจถูกอัปเดตจาก server แล้ว balance เปลี่ยน
     //userBets อาจถูกล้างก่อนจบรอบ→ ผลเกมรอบนี้จะผิดเพี้ยน ❌
 
@@ -258,13 +247,9 @@ function FootballLuckGameMiniStyled({ className }) {
 
         let scoreTeamA, scoreTeamB;
         if (betForThisMatch) {
-          if (checkLuck()) {
-            // เรียก API/Thunk เพื่อปรับ luck ของ user (server จะคืนค่า lucknumber ใหม่)
-            dispatch(played());
-            scoreTeamA = randomScore();
-            scoreTeamA = randomScore();
-            scoreTeamB = randomScore();
-          } else {
+          // ถ้า ispay เป็น false ให้บังคับให้ผู้เล่นแพ้
+          console.log("ispay:", isPaySnapshot);
+          if (!isPaySnapshot) {
             const forced = forceLose(
               betForThisMatch.team,
               betForThisMatch.team === m.teamA ? m.teamB : m.teamA
@@ -277,6 +262,27 @@ function FootballLuckGameMiniStyled({ className }) {
               typeof forced[m.teamB] === "number"
                 ? forced[m.teamB]
                 : randomScore();
+          } else {
+            // ถ้า ispay เป็น true ให้สุ่มตาม logic เดิม
+            if (checkLuck()) {
+              // เรียก API/Thunk เพื่อปรับ luck ของ user (server จะคืนค่า lucknumber ใหม่)
+              // dispatch(played());
+              scoreTeamA = randomScore();
+              scoreTeamB = randomScore();
+            } else {
+              const forced = forceLose(
+                betForThisMatch.team,
+                betForThisMatch.team === m.teamA ? m.teamB : m.teamA
+              );
+              scoreTeamA =
+                typeof forced[m.teamA] === "number"
+                  ? forced[m.teamA]
+                  : randomScore();
+              scoreTeamB =
+                typeof forced[m.teamB] === "number"
+                  ? forced[m.teamB]
+                  : randomScore();
+            }
           }
         } else {
           scoreTeamA = randomScore();
@@ -287,8 +293,8 @@ function FootballLuckGameMiniStyled({ className }) {
           scoreTeamA > scoreTeamB
             ? m.teamA
             : scoreTeamB > scoreTeamA
-            ? m.teamB
-            : "draw";
+              ? m.teamB
+              : "draw";
 
         return {
           teamA: m.teamA,
@@ -377,6 +383,7 @@ function FootballLuckGameMiniStyled({ className }) {
 
       if (gain > 0) {
         dispatch(addBalance({ amount: gain }));
+        dispatch(played());
       }
       setUserBets([]); // clear local bets
 
@@ -390,7 +397,7 @@ function FootballLuckGameMiniStyled({ className }) {
       ]);
 
       // รีเซ็ตรอบใหม่
-      setTimeout(() => {
+      setTimeout(async () => {
         setResults([]);
         genMatches();
         setTimer(TIME);
