@@ -48,6 +48,16 @@ export const played = createAsyncThunk('user/played', async () => {
     return response.data;
 });
 
+export const editProfile = createAsyncThunk('user/editProfile', async (Data) => {
+    const response = await axios.put(`${API_URL}/users/editProfile`, { firstname: Data.firstname, lastname: Data.lastname }, { withCredentials: true });
+    return response.data;
+});
+
+export const deleteProfile = createAsyncThunk('user/deleteProfile', async () => {
+    const response = await axios.delete(`${API_URL}/users/deleteProfile`, { withCredentials: true });
+    return response.data;
+});
+
 const initialState = {
     id: null,
     role: null,
@@ -112,6 +122,21 @@ export const userSlice = createSlice({
             else if (action.type.includes('played')) {
                 state.lucknumber = action.payload.lucknumber
             } else if (action.type.includes('logout')) {
+                state.isLoggedIn = false
+                state.id = null
+                state.role = null
+                state.firstname = null
+                state.lastname = null
+                state.phoneNumber = null
+                state.balance = null
+                state.turn = null
+                state.lucknumber = null
+                state.gamelock = []
+                state.code = null
+            } else if (action.type.includes('editProfile')) {
+                state.firstname = action.payload.firstname
+                state.lastname = action.payload.lastname
+            } else if (action.type.includes('deleteProfile')) {
                 state.isLoggedIn = false
                 state.id = null
                 state.role = null

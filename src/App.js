@@ -6,8 +6,6 @@ import Barcarat from "./component/games/Barcarat"
 import Home from "./component/Home"
 import Ballgame from './component/games/Ballgame';  
 
-import Admin from "./component/Admin"
-import UserDetailPage from './component/UserDetailPage';
 import Auth from "./component/Auth"
 import NotFound from "./component/NotFound"
 
@@ -68,8 +66,6 @@ function App() {
       <GlobalStyle />
       <Routes>
         <Route path="/" element={<Home banners={banners} secGames={secGames} />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/admin/user/:id" element={<UserDetailPage />} />
         <Route path="/auth/:type" element={<Auth />} />
         <Route path="*" element={<NotFound />} />
 
