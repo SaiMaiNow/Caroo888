@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, use } from "react";
 import styled from "styled-components";
-
+import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,6 +9,22 @@ import {
   played,
   fetchUser,
 } from "../../../features/user/userSlice";
+
+const API_URL = "http://localhost:4567/api/v1"; 
+
+async function fetchLuckRate() {
+  try {
+    const res = await axios.get(`${API_URL}/luck/getrate`, {
+      withCredentials: true,
+    });
+    // axios จะโยน error ถ้าไม่ใช่ status 200–299
+    return res.data.winRate; 
+  } catch (err) {
+    console.error("Error fetching luck rate:", err);
+    return null;
+  }
+}
+
 
 const TIME = 15;
 const TEAMS = [
@@ -37,6 +53,8 @@ const TEAMS = [
 //const MockUSER = { name: "Player1", luck: 55, bal: 5000, bets: [] };
 
 function FootballLuckGameMiniStyled({ className }) {
+  const [luckRate, setLuckRate] = useState(0);
+
   const [teams, setTeams] = useState(TEAMS); //ตารางคะแนน
   const user = useSelector((state) => state.user);
   console.log("user:", user);
@@ -60,11 +78,24 @@ function FootballLuckGameMiniStyled({ className }) {
   const [fadeState, setFadeState] = useState("fade-in");
 
   const randomScore = () => Math.floor(Math.random() * 11);
-  const checkLuck = (luck) => Math.floor(Math.random() * 100) + 1 <= luck;
   const forceLose = (team, opp) => ({
     [team]: Math.floor(Math.random() * 4),
     [opp]: Math.floor(Math.random() * 6) + 5,
   });
+
+  useEffect(() => {
+     if (user.isLoggedIn) {
+       fetchLuckRate().then(rate => {
+         if (rate !== null) {
+           setLuckRate(rate);
+         }
+       });
+     }
+  }, [user.isLoggedIn]);
+
+  const checkLuck = () => {
+    return luckRate;
+  };
 
   useEffect(() => {
     dispatch(fetchUser());
@@ -223,12 +254,11 @@ function FootballLuckGameMiniStyled({ className }) {
           (b) => b.teamA === m.teamA && b.teamB === m.teamB
         );
 
-        console.log(userSnapshot.lucknumber);
-        console.log(user.lucknumber);
+
 
         let scoreTeamA, scoreTeamB;
         if (betForThisMatch) {
-          if (checkLuck(userSnapshot.lucknumber ?? 0)) {
+          if (checkLuck()) {
             // เรียก API/Thunk เพื่อปรับ luck ของ user (server จะคืนค่า lucknumber ใหม่)
             dispatch(played());
             scoreTeamA = randomScore();
