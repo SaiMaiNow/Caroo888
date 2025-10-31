@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import GlobalStyle from './GlobalStyle';
 
+import Barcarat from "./component/games/Barcarat"
 import Home from "./component/Home"
 import Test from "./component/Test"
 import Ballgame from './component/games/Ballgame';  
@@ -15,6 +16,7 @@ function App() {
     <>
       <GlobalStyle />
       <Routes>
+        <Route path="/games/Barcarat" element={<Barcarat />} />
         <Route path="/" element={<Home />} />
         <Route path="/Ballgame" element={<Ballgame />} />
         <Route path="/Admin" element={<Admin />} />
