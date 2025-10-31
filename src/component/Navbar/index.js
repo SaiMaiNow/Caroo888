@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser, logout } from "../../features/user/userSlice";
+import Promotion from "../Promotion";
 import UserInfo from "../UserInfo";
 
 function Navbar({ className }) {
@@ -13,6 +14,8 @@ function Navbar({ className }) {
   const menuRef = useRef(null);
   const menuButtonRef = useRef(null);
   const navigate = useNavigate();
+
+  const [showPromotion, setShowPromotion] = useState(false);
 
   useEffect(() => {
     dispatch(fetchUser());
@@ -44,7 +47,7 @@ function Navbar({ className }) {
   };
 
   const handleDeposit = () => {
-    navigate("/deposit");
+    // navigate('/deposit')
   };
 
   const handleMyAccount = () => {
@@ -118,7 +121,7 @@ function Navbar({ className }) {
           </svg>
           ฝาก ถอน
         </Link>
-        <Link to="/promotion">
+        <button className="promo-btn" onClick={() => setShowPromotion(true)}>
           <svg
             className="icon"
             xmlns="http://www.w3.org/2000/svg"
@@ -136,8 +139,8 @@ function Navbar({ className }) {
             ></path>
           </svg>
           โปรโมชั่น
-        </Link>
-        <Link to="https://github.com/SaiMaiNow/Caroo888" target="_blank">
+        </button>
+        <Link to="/contact">
           <svg
             className="icon"
             xmlns="http://www.w3.org/2000/svg"
@@ -221,6 +224,7 @@ function Navbar({ className }) {
       )}
 
       {showUserInfo && <UserInfo onClose={() => setShowUserInfo(false)} />}
+      {showPromotion && <Promotion onClose={() => setShowPromotion(false)} />}
     </header>
   );
 }
@@ -270,7 +274,8 @@ export default styled(Navbar)`
     gap: 5rem;
 
     /* Link เป็น React component ที่สุดท้ายแปลงเป็น <a> tag */
-    a {
+    a,
+    .promo-btn {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -280,6 +285,8 @@ export default styled(Navbar)`
       text-decoration: none;
       transition: all 0.2s ease;
       margin-right: 5px;
+      background: none;
+      border: none;
 
       .icon {
         // font-size: 50px;

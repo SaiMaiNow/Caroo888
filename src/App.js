@@ -6,9 +6,10 @@ import Barcarat from "./component/games/Barcarat";
 import Home from "./component/Home";
 import Ballgame from "./component/games/Ballgame";
 
-import Auth from "./component/Auth";
-import NotFound from "./component/NotFound";
-import UserInfo from "./component/UserInfo";
+import Auth from "./component/Auth"
+import NotFound from "./component/NotFound"
+import Promotion from './component/Promotion';
+import UserInfo from './component/UserInfo';
 
 const BANNERS = [
   "/images/1.png",
@@ -73,6 +74,7 @@ function App() {
         <Route path="/games/ballgame" element={<Ballgame />} />
         <Route path="/games/baccarat" element={<Barcarat />} />
         <Route path="/auth/:type" element={<Auth />} />
+        <Route path="/promotion" element={<Promotion />} />
         <Route path="*" element={<NotFound />} />
 
         {games.map((game) => (
