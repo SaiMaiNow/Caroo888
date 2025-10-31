@@ -5,7 +5,7 @@ import GlobalStyle from "./GlobalStyle";
 import Barcarat from "./component/games/Barcarat";
 import Home from "./component/Home";
 import Ballgame from "./component/games/Ballgame";
-import Slot from "./component/games/Slot";
+import Slot from "./component/games/Slots";
 
 import Auth from "./component/Auth"
 import NotFound from "./component/NotFound"
