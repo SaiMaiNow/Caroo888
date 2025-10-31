@@ -8,6 +8,7 @@ import Ballgame from './component/games/Ballgame';
 
 import Auth from "./component/Auth"
 import NotFound from "./component/NotFound"
+import UserInfo from './component/UserInfo';
 
 const BANNERS = [
   "/images/1.png",
@@ -65,7 +66,12 @@ function App() {
     <>
       <GlobalStyle />
       <Routes>
-        <Route path="/" element={<Home banners={banners} secGames={secGames} />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/user" element={<UserInfo />} />
+        <Route path="/games/ballgame" element={<Ballgame />} />
+        <Route path="/games/baccarat" element={<Barcarat />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/user/:id" element={<UserDetailPage />} />
         <Route path="/auth/:type" element={<Auth />} />
         <Route path="*" element={<NotFound />} />
 
