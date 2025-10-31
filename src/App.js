@@ -1,10 +1,10 @@
-import { Routes, Route } from 'react-router-dom';
-import { useState } from 'react';
-import GlobalStyle from './GlobalStyle';
+import { Routes, Route } from "react-router-dom";
+import { useState } from "react";
+import GlobalStyle from "./GlobalStyle";
 
-import Barcarat from "./component/games/Barcarat"
-import Home from "./component/Home"
-import Ballgame from './component/games/Ballgame';  
+import Barcarat from "./component/games/Barcarat";
+import Home from "./component/Home";
+import Ballgame from "./component/games/Ballgame";
 
 import Auth from "./component/Auth"
 import NotFound from "./component/NotFound"
@@ -20,7 +20,7 @@ const BANNERS = [
 
 const GAMES = [
   {
-    id: 'SLOT',
+    id: "SLOT",
     title: "สล็อตออนไลน์",
     icon: "/images/slot.jpeg",
     path: "/games/slot",
@@ -29,10 +29,10 @@ const GAMES = [
       "/images/banner/1.png",
       "/images/banner/2.png",
       "/images/banner/9.png",
-    ]
+    ],
   },
   {
-    id: 'BACCARAT',
+    id: "BACCARAT",
     title: "บาคาร่าออนไลน์",
     icon: "/images/card.jpeg",
     path: "/games/baccarat",
@@ -41,10 +41,10 @@ const GAMES = [
       "/images/banner/3.png",
       "/images/banner/4.png",
       "/images/banner/5.png",
-    ]
+    ],
   },
   {
-    id: 'BALLGAME',
+    id: "BALLGAME",
     title: "พนันฟุตบอล",
     icon: "/images/pngegg.png",
     path: "/games/ballgame",
@@ -53,26 +53,26 @@ const GAMES = [
       "/images/banner/6.png",
       "/images/banner/7.png",
       "/images/banner/8.png",
-    ]
+    ],
   },
 ];
 
-const SEC_GAMES = ['SLOT', 'BACCARAT', 'BALLGAME'];
+const SEC_GAMES = ["SLOT", "BACCARAT", "BALLGAME"];
 
 function App() {
-  const [banners,] = useState(BANNERS);
-  const [games,] = useState(GAMES);
-  const [secGames,] = useState(games.filter((game) => SEC_GAMES.includes(game.id)));
+  const [banners] = useState(BANNERS);
+  const [games] = useState(GAMES);
+  const [secGames] = useState(
+    games.filter((game) => SEC_GAMES.includes(game.id))
+  );
   return (
     <>
       <GlobalStyle />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home banners={banners} secGames={secGames} />}/>
         <Route path="/user" element={<UserInfo />} />
         <Route path="/games/ballgame" element={<Ballgame />} />
         <Route path="/games/baccarat" element={<Barcarat />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/admin/user/:id" element={<UserDetailPage />} />
         <Route path="/auth/:type" element={<Auth />} />
         <Route path="/promotion" element={<Promotion />} />
         <Route path="*" element={<NotFound />} />

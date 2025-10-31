@@ -4,13 +4,16 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser, logout } from "../../features/user/userSlice";
 import Promotion from "../Promotion";
+import UserInfo from "../UserInfo";
 
 function Navbar({ className }) {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showUserInfo, setShowUserInfo] = useState(false);
   const menuRef = useRef(null);
   const menuButtonRef = useRef(null);
+  const navigate = useNavigate();
 
   const [showPromotion, setShowPromotion] = useState(false);
 
@@ -49,7 +52,8 @@ function Navbar({ className }) {
 
   const handleMyAccount = () => {
     setIsMenuOpen(false);
-    // navigate('/my-account')
+    // navigate('/user')
+    setShowUserInfo(true);
   };
 
   const handleLogout = () => {
@@ -218,6 +222,8 @@ function Navbar({ className }) {
           </div>
         </div>
       )}
+
+      {showUserInfo && <UserInfo onClose={() => setShowUserInfo(false)} />}
       {showPromotion && <Promotion onClose={() => setShowPromotion(false)} />}
     </header>
   );
