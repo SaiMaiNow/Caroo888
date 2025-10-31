@@ -4,19 +4,15 @@ import { useState, useEffect } from "react";
 import Navbar from "../Navbar";
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchUser } from '../../features/user/userSlice'
+import PropTypes from 'prop-types'
+import { useNavigate } from 'react-router-dom'
 
-function Home({ className }) {
+function Home({ className, banners, secGames }) {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.user)
+  const navigate = useNavigate()
 
   const [currentBanner, setCurrentBanner] = useState(0);
-
-  const banners = [
-    "/images/1.png",
-    "/images/2.png",
-    "/images/3.png",
-    "/images/4.png",
-  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -37,9 +33,13 @@ function Home({ className }) {
   }, [dispatch])
 
   const handleGameClick = (path) => {
-    const gameWindow = window.open(path, '_blank', 'width=1500,height=800');
-    if (!gameWindow && user.isLoggedIn && user.isDataLoaded) {
-      window.open(path, '_blank');
+    if (user.isLoggedIn && user.isDataLoaded) {
+      const gameWindow = window.open(path, '_blank', 'width=1500,height=800');
+      if (!gameWindow) {
+        window.open(path, '_blank');
+      }
+    } else {
+      navigate('/auth/login');
     }
   };
 
@@ -78,32 +78,34 @@ function Home({ className }) {
             </div>
           </section>
 
-          <section className="games-section">
-            <div className="section-header">
-              <div>
-                <img src="/images/slot.jpeg" className="section-icon" />
-                <h2>สล็อตออนไลน์</h2>
-              </div>
-
-              <button onClick={() => handleGameClick('/games/slot')}>เล่นเกม</button>
-            </div>
-
-            <div className="games-grid">
-              <div className="game-card large">
-                <span className="game-title"></span>
-              </div>
-              <div className="game-cards-small">
-                <div className="game-card small">
-                  <span className="game-title"></span>
+          {secGames.map((game) => (
+            <section key={game.id} className="games-section">
+              <div className="section-header">
+                <div>
+                  <img src={game.icon} className="section-icon" />
+                  <h2>{game.title}</h2>
                 </div>
-                <div className="game-card small">
-                  <span className="game-title"></span>
+
+                <button onClick={() => handleGameClick(game.path)}>เล่นเกม</button>
+              </div>
+
+              <div className="games-grid">
+                <div className="game-card large">
+                  <img src={game.images[0]} className="game-image" />
+                </div>
+                <div className="game-cards-small">
+                  <div className="game-card small">
+                    <img src={game.images[1]} className="game-image" />
+                  </div>
+                  <div className="game-card small">
+                    <img src={game.images[2]} className="game-image" />
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          ))}
 
-          <section className="games-section">
+          {/* <section className="games-section">
             <div className="section-header">
               <div>
                 <img src="/images/card.jpeg" className="section-icon" />
@@ -143,7 +145,7 @@ function Home({ className }) {
                 <div className="game-card small"></div>
               </div>
             </div>
-          </section>
+          </section> */}
 
           <section className="info-game">
             <h2 className="brand-title">Caroo888</h2>
@@ -155,14 +157,14 @@ function Home({ className }) {
             </p>
 
             <div className="info-section">
-              <h3> Slot สาวถ้ำ</h3>
+              <h3> Slot</h3>
               <p>
                 สัมผัสพลังแห่งโชคลาภจากดินแดนโบราณ!เพียงกดหมุน วงล้อขนาด 5x6
                 จะสุ่มภาพทั้งหมดพร้อมกันหากภาพตรงกันในแนวตั้ง แนวนอน
                 หรือแนวเฉียง จะได้รับรางวัลทันที!เมื่อชนะ
                 สัญลักษณ์ที่แตกจะหล่นลงมาแทนที่
                 สร้างโอกาสรับโบนัสซ้ำได้ไม่รู้จบ!เลือกช่วงราคาการหมุนได้ตามใจ
-                แล้วลุ้นรับสมบัติล้ำค่าของสาวถ้ำไปพร้อมกัน!
+                แล้วลุ้นรับสมบัติล้ำค่าของเกม Slot ไปพร้อมกัน!
               </p>
             </div>
 
@@ -175,18 +177,6 @@ function Home({ className }) {
                 2 ใบลุ้นแต้มสูงสุด 9 แต้ม ดูสถิติย้อนหลังได้ 7 ตา
                 ช่วยประกอบการตัดสินใจในการลงเดิมพันรอบต่อไป ทายถูก
                 รับเงินเต็มมือ ทำทุนกู้ซื้อรถให้ชายไอซ์ได้สบาย ๆ
-              </p>
-            </div>
-
-            <div className="info-section">
-              <h3>เกมเลือกไพ่เสี่ยงโชค</h3>
-              <p>
-                เลือกจากไพ่ 10 ใบ เปิดไปทีละใบเพื่อตามหารางวัลใหญ่! เลือกถูก
-                รับเงินต่อไปเรื่อย ๆ เลือกพอเมื่อไหร่ กด “พอ”
-                เพื่อรับรางวัลที่ได้มา แต่ต้องเลือกถูกอย่างน้อย 2
-                ใบก่อนถึงจะได้เงินนะ! แต่ระวัง… ถ้าเปิดพลาดเมื่อไหร่
-                แตกหมดทันที! 🔥 เกมเสี่ยงโชคสไตล์คาสิโนฝรั่ง สนุก ลุ้น
-                ระทึกทุกคลิก!
               </p>
             </div>
 
@@ -205,6 +195,12 @@ function Home({ className }) {
       </div>
     </div>
   );
+}
+
+Home.propTypes = {
+  className: PropTypes.string.isRequired,
+  banners: PropTypes.array.isRequired,
+  secGames: PropTypes.array.isRequired,
 }
 
 export default styled(Home)`
@@ -395,16 +391,16 @@ export default styled(Home)`
             border-radius: 12px;
             display: flex;
             align-items: flex-end;
-            padding: 1rem;
+            /* padding: 1rem; */
             position: relative;
             overflow: hidden;
             aspect-ratio: 16/9;
 
-            .game-title {
-              font-size: 0.9rem;
-              color: #fff;
-              position: relative;
-              z-index: 1;
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              border-radius: 12px;
             }
           }
 

@@ -13,6 +13,11 @@ export const login = createAsyncThunk('user/login', async (Data) => {
     return response.data;
 });
 
+export const logout = createAsyncThunk('user/logout', async () => {
+    const response = await axios.post(`${API_URL}/auth/logout`, {}, { withCredentials: true })
+    return response.data;
+});
+
 export const register = createAsyncThunk('user/register', async (Data) => {
     const response = await axios.post(`${API_URL}/auth/register`, {firstname: Data.firstname, lastname: Data.lastname, phoneNumber: Data.phoneNumber, password: Data.password, agentCode: Data.agentCode}, { withCredentials: true });
     return response.data;
@@ -106,6 +111,18 @@ export const userSlice = createSlice({
             }
             else if (action.type.includes('played')) {
                 state.lucknumber = action.payload.lucknumber
+            } else if (action.type.includes('logout')) {
+                state.isLoggedIn = false
+                state.id = null
+                state.role = null
+                state.firstname = null
+                state.lastname = null
+                state.phoneNumber = null
+                state.balance = null
+                state.turn = null
+                state.lucknumber = null
+                state.gamelock = []
+                state.code = null
             }
         })
         builder.addMatcher((action) => action.type.endsWith('/rejected'), (state, action) => {

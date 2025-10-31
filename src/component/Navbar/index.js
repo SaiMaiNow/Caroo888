@@ -1,16 +1,58 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchUser } from '../../features/user/userSlice'
+import { fetchUser, logout } from '../../features/user/userSlice'
 
 function Navbar({ className }) {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.user)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const menuRef = useRef(null)
+  const menuButtonRef = useRef(null)
 
   useEffect(() => {
     dispatch(fetchUser())
   }, [dispatch])
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(event.target)
+      ) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isMenuOpen])
+
+  const handleOpenMenu = () => {
+    setIsMenuOpen(!isMenuOpen)
+  }
+
+  const handleDeposit = () => {
+    // navigate('/deposit')
+  }
+
+  const handleMyAccount = () => {
+    setIsMenuOpen(false)
+    // navigate('/my-account')
+  }
+
+  const handleLogout = () => {
+    setIsMenuOpen(false)
+    dispatch(logout())
+  }
 
   return (
     <header className={className}>
@@ -47,10 +89,10 @@ function Navbar({ className }) {
         {user && user?.isLoggedIn && user?.isDataLoaded ? (
           <div className="user-info">
             <p>{user.balance}THB</p>
-            <button>ฝาก</button>
-            <div>
+            <button onClick={handleDeposit}>ฝาก</button>
+            <button ref={menuButtonRef} onClick={handleOpenMenu}>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M4 22a8 8 0 1 1 16 0zm8-9c-3.315 0-6-2.685-6-6s2.685-6 6-6s6 2.685 6 6s-2.685 6-6 6" /></svg>
-            </div>
+            </button>
           </div>
         ) : (
           <>
@@ -63,11 +105,27 @@ function Navbar({ className }) {
           </>
         )}
       </div>
+
+      {isMenuOpen && (
+        <div ref={menuRef} className="menu-overlay">
+          <div className="menu-content">
+            <button onClick={handleMyAccount}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4a4 4 0 0 1 4 4a4 4 0 0 1-4 4a4 4 0 0 1-4-4a4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/></svg>
+              บัญชีของฉัน
+            </button>
+            <button onClick={handleLogout}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z"/></svg>
+              ออกจากระบบ
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
 
 export default styled(Navbar)`
+  position: relative;
   font-family: "Italiana", serif;
   height: 100px;
   width: 100%;
@@ -191,7 +249,7 @@ export default styled(Navbar)`
         border-radius: 0.5rem;
       }
 
-      div {
+      button:last-child {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -200,6 +258,55 @@ export default styled(Navbar)`
         font-size: 1rem;
         padding: 0.4rem 0.6rem;
         border-radius: 0.5rem;
+        background:transparent;
+      }
+    }
+  }
+
+  .menu-overlay {
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    top: 75px;
+    right: 50px;
+    padding: 0.5rem 0.7rem;
+    width: 150px;
+    background: #070A0B;
+    z-index: 100;
+    border-radius: 0.5rem 0 0.5rem 0.5rem;
+    border: 1px solid white;
+
+    .menu-content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      color: white;
+      font-size: 1rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      justify-content: center;
+      align-items: center;
+
+      button {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+        font-weight: 500;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #E89300;
       }
     }
   }
