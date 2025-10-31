@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import PropTypes from "prop-types";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchUser,
@@ -9,10 +10,10 @@ import {
   deleteProfile,
 } from "../../features/user/userSlice";
 
-function UserInfo({ className, onClose }) {
+function UserInfo({ className, onClose, page }) {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const [activePage, setActivePage] = useState("profile");
+  const [activePage, setActivePage] = useState(page);
   const [tab, setTab] = useState("deposit");
   const [amount, setAmount] = useState("");
   const [firstname, setFirstname] = useState("");
@@ -286,6 +287,12 @@ function UserInfo({ className, onClose }) {
     </div>
   );
 }
+
+UserInfo.propTypes = {
+  className: PropTypes.string,
+  onClose: PropTypes.func,
+  page: PropTypes.string,
+};
 
 export default styled(UserInfo)`
   position: fixed;

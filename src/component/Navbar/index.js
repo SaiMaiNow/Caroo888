@@ -11,6 +11,7 @@ function Navbar({ className }) {
   const user = useSelector((state) => state.user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showUserInfo, setShowUserInfo] = useState(false);
+  const [userInfoPage, setUserInfoPage] = useState("profile");
   const menuRef = useRef(null);
   const menuButtonRef = useRef(null);
 
@@ -47,12 +48,15 @@ function Navbar({ className }) {
 
   const handleDeposit = () => {
     // navigate('/deposit')
+    setShowUserInfo(true);
+    setUserInfoPage("cashier");
   };
 
   const handleMyAccount = () => {
     setIsMenuOpen(false);
     // navigate('/user')
     setShowUserInfo(true);
+    setUserInfoPage("profile");
   };
 
   const handleLogout = () => {
@@ -105,7 +109,7 @@ function Navbar({ className }) {
           </svg>
           หน้าแรก
         </Link>
-        <Link to="/deposit">
+        <button onClick={handleDeposit}>
           <svg
             className="icon"
             xmlns="http://www.w3.org/2000/svg"
@@ -119,7 +123,7 @@ function Navbar({ className }) {
             ></path>
           </svg>
           ฝาก ถอน
-        </Link>
+        </button>
         <button className="promo-btn" onClick={() => setShowPromotion(true)}>
           <svg
             className="icon"
@@ -222,7 +226,7 @@ function Navbar({ className }) {
         </div>
       )}
 
-      {showUserInfo && <UserInfo onClose={() => setShowUserInfo(false)} />}
+      {showUserInfo && <UserInfo onClose={() => setShowUserInfo(false)} page={userInfoPage} />}
       {showPromotion && <Promotion onClose={() => setShowPromotion(false)} />}
     </header>
   );
@@ -274,6 +278,7 @@ export default styled(Navbar)`
 
     /* Link เป็น React component ที่สุดท้ายแปลงเป็น <a> tag */
     a,
+    button,
     .promo-btn {
       display: flex;
       flex-direction: column;
