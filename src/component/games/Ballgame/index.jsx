@@ -141,7 +141,7 @@ function FootballLuckGameMiniStyled({ className }) {
     if (amt > (user.balance ?? 0)) return alert("ยอดเงินไม่พอสำหรับเดิมพันนี้");
 
     if (
-      user.bets.find(
+      (user.bets ?? []).find(
         (b) =>
           b.match === matchIndex &&
           b.teamA === matches[matchIndex].teamA &&
@@ -367,7 +367,7 @@ function FootballLuckGameMiniStyled({ className }) {
       }, 2000);
     }, 100);
   };
-//🍀 Luck {user.lucknumber} 
+  //🍀 Luck {user.lucknumber}
   return (
     <div className={className}>
       <div className="header">
@@ -375,9 +375,7 @@ function FootballLuckGameMiniStyled({ className }) {
           Apex <span>Ball</span>
         </h1>
         <div className="userInfo">
-          
-          💰 ฿{user.balance} {user.firstname}{" "}
-          {user.lastname}
+          💰 ฿{user.balance} {user.firstname} {user.lastname}
         </div>
       </div>
 
@@ -642,21 +640,19 @@ export default styled(FootballLuckGameMiniStyled)`
     background: #111;
     padding: 15px 30px;
     border-bottom: 2px solid #00eaff;
-    
   }
   .header h1 {
     font-size: 24px;
-        text-shadow: 0 0 6px #f0f0f0ff, 0 0 6px #00bfff; /* เงาสีฟ้า */
-        
+    text-shadow: 0 0 6px #f0f0f0ff, 0 0 6px #00bfff; /* เงาสีฟ้า */
   }
   .header h1 span {
     color: #00eaff;
   }
-.userInfo {
-  color: #ffffffff; /* สีขาว */
-  font-size: 14px;
-  text-shadow: 0 0 6px #00bfff, 0 0 12px #00bfff; /* เงาสีฟ้า */
-}
+  .userInfo {
+    color: #ffffffff; /* สีขาว */
+    font-size: 14px;
+    text-shadow: 0 0 6px #00bfff, 0 0 12px #00bfff; /* เงาสีฟ้า */
+  }
 
   .main {
     display: grid;
@@ -676,7 +672,6 @@ export default styled(FootballLuckGameMiniStyled)`
     border-radius: 6px;
     margin-bottom: 10px;
     box-shadow: 0 0 4px #00bfff;
-    
   }
   .sidebar-left table {
     width: 100%;
@@ -696,14 +691,14 @@ export default styled(FootballLuckGameMiniStyled)`
     color: #00eaff;
     border-bottom: 1px solid #00eaff;
   }
-.center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 15px;
-  gap: 15px;
-  border: 1px solid #00eaff;
-}
+  .center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    gap: 15px;
+    border: 1px solid #00eaff;
+  }
 
   .banner {
     background: #00eaff;
@@ -811,7 +806,6 @@ export default styled(FootballLuckGameMiniStyled)`
     cursor: pointer;
     transition: 0.2s;
     box-shadow: 0 0 7px #00eaff;
-    
   }
   .matchCard button:hover {
     background: #00ffff;
